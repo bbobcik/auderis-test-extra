@@ -26,10 +26,10 @@ import java.math.BigInteger;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 
-import static cz.auderis.test.matcher.numeric.RangeMatchers.withinExclusiveInclusiveRange;
-import static cz.auderis.test.matcher.numeric.RangeMatchers.withinExclusiveRange;
-import static cz.auderis.test.matcher.numeric.RangeMatchers.withinInclusiveExclusiveRange;
-import static cz.auderis.test.matcher.numeric.RangeMatchers.withinRange;
+import static cz.auderis.test.matcher.numeric.NumericMatchers.withinExclusiveInclusiveRange;
+import static cz.auderis.test.matcher.numeric.NumericMatchers.withinExclusiveRange;
+import static cz.auderis.test.matcher.numeric.NumericMatchers.withinInclusiveExclusiveRange;
+import static cz.auderis.test.matcher.numeric.NumericMatchers.withinRange;
 import static org.hamcrest.CoreMatchers.not;
 import static org.junit.Assert.assertThat;
 

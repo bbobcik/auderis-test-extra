@@ -38,7 +38,7 @@ public class InBigRangeMatcherTest {
 		final BigDecimal high = new BigDecimal("765.12345");
 		final BigDecimal step = new BigDecimal("0.1");
 		//
-		final Matcher<Number> inRange = RangeMatchers.withinBigRange(low, high);
+		final Matcher<Number> inRange = NumericMatchers.withinBigRange(low, high);
 		//
 		for (BigDecimal x = low.add(step); x.compareTo(high) < 0; x = x.add(step)) {
 			assertThat(x, inRange);
@@ -52,7 +52,7 @@ public class InBigRangeMatcherTest {
 		final BigDecimal high = new BigDecimal("765.12345");
 		final BigDecimal step = new BigDecimal("0.00000000001");
 		//
-		final Matcher<Number> inRange = RangeMatchers.withinBigRange(low, high);
+		final Matcher<Number> inRange = NumericMatchers.withinBigRange(low, high);
 		//
 		assertThat(low.subtract(step), not(inRange));
 		assertThat(high.add(step), not(inRange));
@@ -63,8 +63,8 @@ public class InBigRangeMatcherTest {
 	public void shouldIncludeLowPointInLowInclusiveRange() throws Exception {
 		final BigDecimal low = new BigDecimal("123.987654321");
 		//
-		final Matcher<Number> inRangeII = RangeMatchers.withinBigRange(low, null);
-		final Matcher<Number> inRangeIE = RangeMatchers.withinBigInclusiveExclusiveRange(low, null);
+		final Matcher<Number> inRangeII = NumericMatchers.withinBigRange(low, null);
+		final Matcher<Number> inRangeIE = NumericMatchers.withinBigInclusiveExclusiveRange(low, null);
 		//
 		assertThat(low, inRangeII);
 		assertThat(low, inRangeIE);
@@ -75,8 +75,8 @@ public class InBigRangeMatcherTest {
 	public void shouldExcludeLowPointInLowExclusiveRange() throws Exception {
 		final BigDecimal low = new BigDecimal("123.987654321");
 		//
-		final Matcher<Number> inRangeEE = RangeMatchers.withinBigExclusiveRange(low, null);
-		final Matcher<Number> inRangeEI = RangeMatchers.withinBigExclusiveInclusiveRange(low, null);
+		final Matcher<Number> inRangeEE = NumericMatchers.withinBigExclusiveRange(low, null);
+		final Matcher<Number> inRangeEI = NumericMatchers.withinBigExclusiveInclusiveRange(low, null);
 		//
 		assertThat(low, not(inRangeEE));
 		assertThat(low, not(inRangeEI));
@@ -87,8 +87,8 @@ public class InBigRangeMatcherTest {
 	public void shouldIncludeHighPointInHighInclusiveRange() throws Exception {
 		final BigDecimal high = new BigDecimal("122333.444455555");
 		//
-		final Matcher<Number> inRangeII = RangeMatchers.withinBigRange(null, high);
-		final Matcher<Number> inRangeEI = RangeMatchers.withinBigExclusiveInclusiveRange(null, high);
+		final Matcher<Number> inRangeII = NumericMatchers.withinBigRange(null, high);
+		final Matcher<Number> inRangeEI = NumericMatchers.withinBigExclusiveInclusiveRange(null, high);
 		//
 		assertThat(high, inRangeII);
 		assertThat(high, inRangeEI);
@@ -99,8 +99,8 @@ public class InBigRangeMatcherTest {
 	public void shouldExcludeHighPointInHighExclusiveRange() throws Exception {
 		final BigDecimal high = new BigDecimal("122333.444455555");
 		//
-		final Matcher<Number> inRangeEE = RangeMatchers.withinBigExclusiveRange(null, high);
-		final Matcher<Number> inRangeIE = RangeMatchers.withinBigInclusiveExclusiveRange(null, high);
+		final Matcher<Number> inRangeEE = NumericMatchers.withinBigExclusiveRange(null, high);
+		final Matcher<Number> inRangeIE = NumericMatchers.withinBigInclusiveExclusiveRange(null, high);
 		//
 		assertThat(high, not(inRangeEE));
 		assertThat(high, not(inRangeIE));
@@ -111,7 +111,7 @@ public class InBigRangeMatcherTest {
 	public void shouldMatchAllNumericTypes() throws Exception {
 		final BigDecimal low = BigDecimal.ZERO;
 		final BigDecimal high = BigDecimal.TEN;
-		final Matcher<Number> inRange = RangeMatchers.withinBigRange(low, high);
+		final Matcher<Number> inRange = NumericMatchers.withinBigRange(low, high);
 		//
 		assertThat((byte) 1, inRange);
 		assertThat((short) 2, inRange);

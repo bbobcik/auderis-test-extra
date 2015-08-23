@@ -20,7 +20,7 @@ import org.hamcrest.Matcher;
 
 import java.math.BigDecimal;
 
-public final class RangeMatchers {
+public final class NumericMatchers {
 
 	public static <T> Matcher<Number> withinBigRange(BigDecimal low, BigDecimal high) {
 		return new InBigRangeMatcher(low, high, true, true);
