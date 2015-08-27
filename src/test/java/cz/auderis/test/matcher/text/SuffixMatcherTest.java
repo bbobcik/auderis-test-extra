@@ -7,10 +7,8 @@ import org.hamcrest.StringDescription;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 
-import static cz.auderis.test.matcher.text.TextMatchers.hasCaseInsensitivePrefix;
-import static cz.auderis.test.matcher.text.TextMatchers.hasCaseInsensitiveSuffix;
-import static cz.auderis.test.matcher.text.TextMatchers.hasPrefix;
-import static cz.auderis.test.matcher.text.TextMatchers.hasSuffix;
+import static cz.auderis.test.matcher.text.TextMatchers.withCaseInsensitiveSuffix;
+import static cz.auderis.test.matcher.text.TextMatchers.withSuffix;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.not;
 import static org.junit.Assert.assertThat;
@@ -22,7 +20,7 @@ public class SuffixMatcherTest {
 	public void shouldMatchEmptySuffix() throws Exception {
 		final String testText = "Abc123";
 		//
-		final Matcher<CharSequence> hasEmptySuffix = hasSuffix("");
+		final Matcher<CharSequence> hasEmptySuffix = withSuffix("");
 		//
 		for (int i=0; i<=testText.length(); ++i) {
 			assertThat(testText.substring(0, i), hasEmptySuffix);
@@ -34,7 +32,7 @@ public class SuffixMatcherTest {
 	public void shouldMatchEmptyCaseInsensitiveSuffix() throws Exception {
 		final String testText = "Abc123";
 		//
-		final Matcher<CharSequence> hasEmptySuffix = hasCaseInsensitiveSuffix("");
+		final Matcher<CharSequence> hasEmptySuffix = withCaseInsensitiveSuffix("");
 		//
 		for (int i=0; i<=testText.length(); ++i) {
 			assertThat(testText.substring(0, i), hasEmptySuffix);
@@ -44,29 +42,29 @@ public class SuffixMatcherTest {
 	@Test
 	@Category(UnitTest.class)
 	public void shouldMatchRegularSuffix() throws Exception {
-		assertThat("Abc123", hasSuffix("3"));
-		assertThat("Abc123", hasSuffix("23"));
-		assertThat("Abc123", hasSuffix("123"));
-		assertThat("Abc123", hasSuffix("c123"));
-		assertThat("Abc123", hasSuffix("bc123"));
-		assertThat("Abc123", hasSuffix("Abc123"));
+		assertThat("Abc123", withSuffix("3"));
+		assertThat("Abc123", withSuffix("23"));
+		assertThat("Abc123", withSuffix("123"));
+		assertThat("Abc123", withSuffix("c123"));
+		assertThat("Abc123", withSuffix("bc123"));
+		assertThat("Abc123", withSuffix("Abc123"));
 	}
 
 	@Test
 	@Category(UnitTest.class)
 	public void shouldMatchCaseInsensitiveRegularSuffix() throws Exception {
-		assertThat("Abc123", hasCaseInsensitiveSuffix("3"));
-		assertThat("Abc123", hasCaseInsensitiveSuffix("23"));
-		assertThat("Abc123", hasCaseInsensitiveSuffix("123"));
-		assertThat("Abc123", hasCaseInsensitiveSuffix("C123"));
-		assertThat("Abc123", hasCaseInsensitiveSuffix("BC123"));
-		assertThat("Abc123", hasCaseInsensitiveSuffix("aBC123"));
+		assertThat("Abc123", withCaseInsensitiveSuffix("3"));
+		assertThat("Abc123", withCaseInsensitiveSuffix("23"));
+		assertThat("Abc123", withCaseInsensitiveSuffix("123"));
+		assertThat("Abc123", withCaseInsensitiveSuffix("C123"));
+		assertThat("Abc123", withCaseInsensitiveSuffix("BC123"));
+		assertThat("Abc123", withCaseInsensitiveSuffix("aBC123"));
 	}
 
 	@Test
 	@Category(UnitTest.class)
 	public void shouldDetectCompleteMismatch() throws Exception {
-		final Matcher<CharSequence> hasXyzSuffix = hasSuffix("Xyz");
+		final Matcher<CharSequence> hasXyzSuffix = withSuffix("Xyz");
 		final Description description = new StringDescription();
 		//
 		assertThat("Abc123", not(hasXyzSuffix));
@@ -78,7 +76,7 @@ public class SuffixMatcherTest {
 	@Test
 	@Category(UnitTest.class)
 	public void shouldDetectPartialMismatch() throws Exception {
-		final Matcher<CharSequence> hasXyzSuffix = hasSuffix("Xyz");
+		final Matcher<CharSequence> hasXyzSuffix = withSuffix("Xyz");
 		final Description description = new StringDescription();
 		//
 		assertThat("Abc123yz", not(hasXyzSuffix));

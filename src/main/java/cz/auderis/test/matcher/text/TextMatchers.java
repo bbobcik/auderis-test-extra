@@ -19,19 +19,19 @@ import org.hamcrest.Matcher;
 
 public final class TextMatchers {
 
-	public static <T extends CharSequence> Matcher<T> hasPrefix(String prefix) {
+	public static <T extends CharSequence> Matcher<T> withPrefix(String prefix) {
 		return new PrefixMatcher<T>(prefix, true);
 	}
 
-	public static <T extends CharSequence> Matcher<T> hasCaseInsensitivePrefix(String prefix) {
+	public static <T extends CharSequence> Matcher<T> withCaseInsensitivePrefix(String prefix) {
 		return new PrefixMatcher<T>(prefix, false);
 	}
 
-	public static <T extends CharSequence> Matcher<T> hasSuffix(String suffix) {
+	public static <T extends CharSequence> Matcher<T> withSuffix(String suffix) {
 		return new SuffixMatcher<T>(suffix, true);
 	}
 
-	public static <T extends CharSequence> Matcher<T> hasCaseInsensitiveSuffix(String suffix) {
+	public static <T extends CharSequence> Matcher<T> withCaseInsensitiveSuffix(String suffix) {
 		return new SuffixMatcher<T>(suffix, false);
 	}
 
