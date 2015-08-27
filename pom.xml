@@ -4,7 +4,7 @@
 
 	<groupId>cz.auderis</groupId>
 	<artifactId>auderis-test-extra</artifactId>
-	<version>1.0.1</version>
+	<version>1.0.2-SNAPSHOT</version>
 	<packaging>jar</packaging>
 
 	<name>Auderis Test - extra</name>
@@ -36,7 +36,7 @@
 		<url>git@github.com:bbobcik/auderis-test-extra.git</url>
 		<connection>scm:git:git@github.com:bbobcik/auderis-test-extra.git</connection>
 		<developerConnection>scm:git:git@github.com:bbobcik/auderis-test-extra.git</developerConnection>
-		<tag>auderis-test-extra-1.0.1</tag>
+		<tag>HEAD</tag>
 	</scm>
 
 	<dependencies>
