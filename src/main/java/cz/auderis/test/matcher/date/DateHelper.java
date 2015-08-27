@@ -16,9 +16,6 @@
 
 package cz.auderis.test.matcher.date;
 
-import cz.auderis.test.parameter.convert.DateConverter;
-import junitparams.converters.ConversionFailedException;
-
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -30,11 +27,17 @@ import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
-final class DateHelper {
+public final class DateHelper {
 
 	static final String DATE_ISO_FORMAT = "yyyy-MM-dd";
 	static final String FULL_ISO_FORMAT = "yyyy-MM-dd'T'HH:mm:ss.SS";
+
+	static final Pattern FULL_ISO_PATTERN = Pattern.compile("\\d{4}-\\d{2}-\\d{2}([T ])\\d{2}:\\d{2}:\\d{2}((?:\\.\\d{3})?)");
+	static final Pattern COMPACT_ISO_PATTERN = Pattern.compile("\\d{4}(-?)\\d{2}\\1\\d{2}([T ]?)\\d{2}(:?)\\d{2}\\3\\d{2}");
+	static final Pattern DATE_ISO_PATTERN = Pattern.compile("\\d{4}(-?)\\d{2}\\1\\d{2}");
 
 	static final List<Integer> TIME_UNIT_FIELDS;
 	static final Map<Integer, String> DATE_FIELDS;
@@ -61,7 +64,7 @@ final class DateHelper {
 		TIME_FIELDS = Collections.unmodifiableMap(timeMap);
 	}
 
-	static String formatDate(int leastFieldUnit, Date d) {
+	public static String formatDate(int leastFieldUnit, Date d) {
 		assert (null != d);
 		final DateFormat format;
 		if (DATE_FIELDS.containsKey(leastFieldUnit)) {
@@ -73,7 +76,7 @@ final class DateHelper {
 		return format.format(d);
 	}
 
-	static String[] formatDates(int leastFieldUnit, Object... dates) {
+	public static String[] formatDates(int leastFieldUnit, Object... dates) {
 		assert (null != dates) && (dates.length > 0);
 		final DateFormat format;
 		if (DATE_FIELDS.containsKey(leastFieldUnit)) {
@@ -102,7 +105,7 @@ final class DateHelper {
 		return result;
 	}
 
-	static String getUnitName(int unitField) {
+	public static String getUnitName(int unitField) {
 		if (DATE_FIELDS.containsKey(unitField)) {
 			return DATE_FIELDS.get(unitField);
 		} else if (TIME_FIELDS.containsKey(unitField)) {
@@ -111,46 +114,43 @@ final class DateHelper {
 		throw new IllegalArgumentException("unsupported calendar field");
 	}
 
-	static Date parseDateAllowingNull(String dateText) {
+	public static Date parseDateAllowingNull(String dateText) {
+		return parseDateAllowingNull(dateText, null);
+	}
+
+	public static Date parseDateAllowingNull(String dateText, String optionalCustomFormat) {
 		if ((null == dateText) || dateText.trim().isEmpty()) {
 			return null;
 		}
-		return parseDate(dateText);
+		return parseDate(dateText, optionalCustomFormat);
 	}
 
-	static Date parseDate(String dateText) {
+	public static Date parseDate(String dateText) {
+		return parseDate(dateText, null);
+	}
+
+	public static Date parseDate(String dateText, String optionalCustomFormat) {
 		if (null == dateText) {
 			throw new NullPointerException();
+		} else if (dateText.trim().isEmpty()) {
+			return null;
 		}
-		final DateConverter parser = new DateConverter();
+		final DateFormat format = determineDatePattern(dateText, optionalCustomFormat);
 		try {
-			return parser.convert(dateText, null);
-		} catch (ConversionFailedException e) {
-			// Not a format supported by DateConverter, fall back to default patterns
-		}
-		try {
-			final DateFormat defaultDateTimeFormat = DateFormat.getDateTimeInstance();
-			return defaultDateTimeFormat.parse(dateText);
+			return format.parse(dateText);
 		} catch (ParseException e) {
-			// Failed, try next
+			throw new IllegalArgumentException("Cannot parse date '" + dateText + "'", e);
 		}
-		try {
-			final DateFormat defaultFormat = DateFormat.getInstance();
-			return defaultFormat.parse(dateText);
-		} catch (ParseException e) {
-			// Failed, report error
-		}
-		throw new IllegalArgumentException("Failed to parse date '" + dateText + "'");
 	}
 
-	static List<Integer> majorFieldUnits(int leastMajorUnit) {
+	public static List<Integer> majorFieldUnits(int leastMajorUnit) {
 		final int leastUnitIndex = TIME_UNIT_FIELDS.indexOf(leastMajorUnit);
 		assert leastUnitIndex >= 0;
 		final List<Integer> majorFields = TIME_UNIT_FIELDS.subList(0, leastUnitIndex + 1);
 		return majorFields;
 	}
 
-	static List<Integer> minorFieldUnits(int leastMajorUnit) {
+	public static List<Integer> minorFieldUnits(int leastMajorUnit) {
 		final int leastUnitIndex = TIME_UNIT_FIELDS.indexOf(leastMajorUnit);
 		assert leastUnitIndex >= 0;
 		final int allFieldCount = TIME_UNIT_FIELDS.size();
@@ -161,7 +161,7 @@ final class DateHelper {
 		return minorFields;
 	}
 
-	static void setMinorFieldValues(Calendar targetCal, int... fieldValues) {
+	public static void setMinorFieldValues(Calendar targetCal, int... fieldValues) {
 		final int allFieldCount = TIME_UNIT_FIELDS.size();
 		assert (0 < fieldValues.length) && (fieldValues.length <= allFieldCount);
 		final Iterator<Integer> fieldIterator = TIME_UNIT_FIELDS.listIterator(allFieldCount - fieldValues.length);
@@ -172,18 +172,77 @@ final class DateHelper {
 		}
 	}
 
-	static void resetMinorFieldsToMinimum(Calendar targetCal, int leastMajorUnit) {
+	public static void resetMinorFieldsToMinimum(Calendar targetCal, int leastMajorUnit) {
 		for (final Integer minorUnit : minorFieldUnits(leastMajorUnit)) {
 			final int minValue = targetCal.getActualMinimum(minorUnit);
 			targetCal.set(minorUnit, minValue);
 		}
 	}
 
-	static void resetMinorFieldsToMaximum(Calendar targetCal, int leastMajorUnit) {
+	public static void resetMinorFieldsToMaximum(Calendar targetCal, int leastMajorUnit) {
 		for (final Integer minorUnit : minorFieldUnits(leastMajorUnit)) {
 			final int maxValue = targetCal.getActualMaximum(minorUnit);
 			targetCal.set(minorUnit, maxValue);
 		}
+	}
+
+	public static DateFormat determineDatePattern(String textParam, String options) {
+		final DateFormat format;
+		if ((null != options) && !options.trim().isEmpty()) {
+			// Use user-specified pattern
+			format = new SimpleDateFormat(options);
+		} else {
+			format = recognizeStandardDatePattern(textParam);
+		}
+		return format;
+	}
+
+	private static DateFormat recognizeStandardDatePattern(String textParam) {
+		final StringBuilder formatBuilder = new StringBuilder(32);
+		final Matcher matcher = FULL_ISO_PATTERN.matcher(textParam);
+		if (matcher.matches()) {
+			formatBuilder.append("yyyy-MM-dd");
+			final String dateTimeSeparator = matcher.group(1);
+			formatBuilder.append('\'').append(dateTimeSeparator).append('\'');
+			formatBuilder.append("HH:mm:ss");
+			final String millisPart = matcher.group(2);
+			if ((null != millisPart) && !millisPart.isEmpty()) {
+				formatBuilder.append(".SSS");
+			}
+			return new SimpleDateFormat(formatBuilder.toString());
+		}
+		//
+		matcher.usePattern(COMPACT_ISO_PATTERN).reset();
+		if (matcher.matches()) {
+			final String datePartSeparator = matcher.group(1);
+			formatBuilder.append("yyyy");
+			formatBuilder.append(datePartSeparator).append("MM");
+			formatBuilder.append(datePartSeparator).append("dd");
+			final String dateTimeSeparator = matcher.group(2);
+			if (!dateTimeSeparator.isEmpty()) {
+				formatBuilder.append('\'').append(dateTimeSeparator).append('\'');
+			}
+			final String timePartSeparator = matcher.group(3);
+			formatBuilder.append("HH");
+			formatBuilder.append(timePartSeparator).append("mm");
+			formatBuilder.append(timePartSeparator).append("ss");
+			return new SimpleDateFormat(formatBuilder.toString());
+		}
+		//
+		matcher.usePattern(DATE_ISO_PATTERN).reset();
+		if (matcher.matches()) {
+			final String datePartSeparator = matcher.group(1);
+			formatBuilder.append("yyyy");
+			formatBuilder.append(datePartSeparator).append("MM");
+			formatBuilder.append(datePartSeparator).append("dd");
+			return new SimpleDateFormat(formatBuilder.toString());
+		}
+		//
+		throw new IllegalArgumentException("Cannot determine date format of '" + textParam + "'");
+	}
+
+	private DateHelper() {
+		throw new AssertionError();
 	}
 
 }

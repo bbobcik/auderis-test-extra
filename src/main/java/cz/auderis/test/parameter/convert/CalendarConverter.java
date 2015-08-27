@@ -16,10 +16,9 @@
 
 package cz.auderis.test.parameter.convert;
 
+import cz.auderis.test.matcher.date.DateHelper;
 import junitparams.converters.ConversionFailedException;
 
-import java.text.DateFormat;
-import java.text.ParseException;
 import java.util.Calendar;
 import java.util.Date;
 
@@ -31,16 +30,15 @@ public class CalendarConverter extends AbstractTypeConverter<Calendar> {
 
 	@Override
 	protected Calendar fromString(String objText, String option) throws ConversionFailedException {
-		if (objText.trim().isEmpty()) {
-			return null;
-		}
-		final DateFormat format = DateConverter.determineDatePattern(objText, option);
 		try {
-			final Date date = format.parse(objText);
+			final Date date = DateHelper.parseDateAllowingNull(objText, option);
+			if (null == date) {
+				return null;
+			}
 			final Calendar result = Calendar.getInstance();
 			result.setTime(date);
 			return result;
-		} catch (ParseException e) {
+		} catch (IllegalArgumentException e) {
 			throw new ConversionFailedException("Cannot parse date '" + objText + "': " + e.getMessage());
 		}
 	}
