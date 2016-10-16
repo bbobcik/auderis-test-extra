@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 Boleslav Bobcik - Auderis
+ * Copyright 2015-2016 Boleslav Bobcik - Auderis
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,5 +14,4 @@
  * limitations under the License.
  */
 
-@Deprecated
-package cz.auderis.test.parameter.convert;
+package cz.auderis.test.parameter.annotation.impl;

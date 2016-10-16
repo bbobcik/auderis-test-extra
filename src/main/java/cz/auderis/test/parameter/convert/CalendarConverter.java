@@ -22,6 +22,7 @@ import junitparams.converters.ConversionFailedException;
 import java.util.Calendar;
 import java.util.Date;
 
+@Deprecated
 public class CalendarConverter extends AbstractTypeConverter<Calendar> {
 
 	public CalendarConverter() {

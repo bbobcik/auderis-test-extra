@@ -20,6 +20,7 @@ import junitparams.converters.ConversionFailedException;
 
 import java.math.BigDecimal;
 
+@Deprecated
 public class BigDecimalConverter extends AbstractTypeConverter<BigDecimal> {
 
 	public BigDecimalConverter() {
