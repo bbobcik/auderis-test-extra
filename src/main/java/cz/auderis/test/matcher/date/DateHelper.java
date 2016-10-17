@@ -33,7 +33,7 @@ import java.util.regex.Pattern;
 public final class DateHelper {
 
 	static final String DATE_ISO_FORMAT = "yyyy-MM-dd";
-	static final String FULL_ISO_FORMAT = "yyyy-MM-dd'T'HH:mm:ss.SS";
+	static final String FULL_ISO_FORMAT = "yyyy-MM-dd'T'HH:mm:ss.SSS";
 
 	static final Pattern FULL_ISO_PATTERN = Pattern.compile("\\d{4}-\\d{2}-\\d{2}([T ])\\d{2}:\\d{2}:\\d{2}((?:\\.\\d{3})?)");
 	static final Pattern COMPACT_ISO_PATTERN = Pattern.compile("\\d{4}(-?)\\d{2}\\1\\d{2}([T ]?)\\d{2}(:?)\\d{2}\\3\\d{2}");
