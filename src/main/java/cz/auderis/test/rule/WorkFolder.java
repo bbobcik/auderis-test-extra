@@ -46,6 +46,10 @@ public class WorkFolder extends TemporaryFolder {
 	private Class<?> resourceSearchBaseClass;
 	private Class<?> currentTestClass;
 
+	/**
+	 * Creates a new instance of {@code WorkFolder}.
+	 * @return
+	 */
 	public static WorkFolder basic() {
 		return new WorkFolder();
 	}
@@ -116,7 +120,20 @@ public class WorkFolder extends TemporaryFolder {
 	}
 
 	public File newResourceCopy(String resourceName) throws IOException {
-		return newResourceCopy(resourceName, resourceName);
+		// Get filename part from resource name
+		final int filenameStart;
+		if (-1 != resourceName.indexOf('/')) {
+			filenameStart = 1 + resourceName.lastIndexOf('/');
+		} else if (('/' != File.separatorChar) && (-1 != resourceName.indexOf(File.separatorChar))) {
+			filenameStart = 1 + resourceName.lastIndexOf(File.separatorChar);
+		} else {
+			filenameStart = 0;
+		}
+		if (filenameStart >= resourceName.length()) {
+			throw new IllegalArgumentException("Cannot find filename part in resource name: " + resourceName);
+		}
+		final String fileName = resourceName.substring(filenameStart);
+		return newResourceCopy(fileName, resourceName);
 	}
 
 	private File prepareTargetFile(String targetPath) {
