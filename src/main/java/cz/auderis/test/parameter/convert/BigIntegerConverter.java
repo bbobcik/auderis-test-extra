@@ -20,6 +20,7 @@ import junitparams.converters.ConversionFailedException;
 
 import java.math.BigInteger;
 
+@Deprecated
 public class BigIntegerConverter extends AbstractTypeConverter<BigInteger> {
 
 	public BigIntegerConverter() {

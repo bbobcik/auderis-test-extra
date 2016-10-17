@@ -16,90 +16,139 @@
 
 package cz.auderis.test.matcher.numeric;
 
+import cz.auderis.test.parameter.annotation.BigDec;
+import org.hamcrest.Factory;
 import org.hamcrest.Matcher;
 
 import java.math.BigDecimal;
 
 public final class NumericMatchers {
 
+    @Factory
+    public static <T> Matcher<Number> hasApproximateValue(BigDecimal value, BigDecimal tolerance) {
+        assert null != value;
+        if (null == tolerance) {
+            tolerance = BigDecimal.ZERO;
+        } else if (tolerance.signum() < 0) {
+            tolerance = tolerance.abs();
+        }
+        final BigDecimal lowBound = value.subtract(tolerance);
+        final BigDecimal highBound = value.add(tolerance);
+        assert lowBound.compareTo(highBound) <= 0;
+        return withinBigRange(lowBound, highBound);
+    }
+
+    @Factory
 	public static <T> Matcher<Number> withinBigRange(BigDecimal low, BigDecimal high) {
 		return new InBigRangeMatcher(low, high, true, true);
 	}
 
+    @Factory
 	public static <T> Matcher<Number> withinBigExclusiveRange(BigDecimal low, BigDecimal high) {
 		return new InBigRangeMatcher(low, high, false, false);
 	}
 
+    @Factory
 	public static <T> Matcher<Number> withinBigInclusiveExclusiveRange(BigDecimal low, BigDecimal high) {
 		return new InBigRangeMatcher(low, high, true, false);
 	}
 
+    @Factory
 	public static <T> Matcher<Number> withinBigExclusiveInclusiveRange(BigDecimal low, BigDecimal high) {
 		return new InBigRangeMatcher(low, high, false, true);
 	}
 
+    @Factory
+    public static <T> Matcher<Number> hasApproximateValue(long value, long tolerance) {
+        if (tolerance < 0) {
+            tolerance = -tolerance;
+        }
+        return withinBigRange(value - tolerance, value + tolerance);
+    }
+
+    @Factory
 	public static <T> Matcher<Number> withinBigRange(long lowInt, long highInt) {
 		final BigDecimal low = BigDecimal.valueOf(lowInt);
 		final BigDecimal high = BigDecimal.valueOf(highInt);
 		return new InBigRangeMatcher(low, high, true, true);
 	}
 
+    @Factory
 	public static <T> Matcher<Number> withinBigExclusiveRange(long lowInt, long highInt) {
 		final BigDecimal low = BigDecimal.valueOf(lowInt);
 		final BigDecimal high = BigDecimal.valueOf(highInt);
 		return new InBigRangeMatcher(low, high, false, false);
 	}
 
+    @Factory
 	public static <T> Matcher<Number> withinBigInclusiveExclusiveRange(long lowInt, long highInt) {
 		final BigDecimal low = BigDecimal.valueOf(lowInt);
 		final BigDecimal high = BigDecimal.valueOf(highInt);
 		return new InBigRangeMatcher(low, high, true, false);
 	}
 
+    @Factory
 	public static <T> Matcher<Number> withinBigExclusiveInclusiveRange(long lowInt, long highInt) {
 		final BigDecimal low = BigDecimal.valueOf(lowInt);
 		final BigDecimal high = BigDecimal.valueOf(highInt);
 		return new InBigRangeMatcher(low, high, false, true);
 	}
 
+    @Factory
 	public static <T> Matcher<Number> withinBigRange(double lowFloat, double highFloat) {
 		final BigDecimal low = BigDecimal.valueOf(lowFloat);
 		final BigDecimal high = BigDecimal.valueOf(highFloat);
 		return new InBigRangeMatcher(low, high, true, true);
 	}
 
+    @Factory
 	public static <T> Matcher<Number> withinBigExclusiveRange(double lowFloat, double highFloat) {
 		final BigDecimal low = BigDecimal.valueOf(lowFloat);
 		final BigDecimal high = BigDecimal.valueOf(highFloat);
 		return new InBigRangeMatcher(low, high, false, false);
 	}
 
+    @Factory
 	public static <T> Matcher<Number> withinBigInclusiveExclusiveRange(double lowFloat, double highFloat) {
 		final BigDecimal low = BigDecimal.valueOf(lowFloat);
 		final BigDecimal high = BigDecimal.valueOf(highFloat);
 		return new InBigRangeMatcher(low, high, true, false);
 	}
 
+    @Factory
 	public static <T> Matcher<Number> withinBigExclusiveInclusiveRange(double lowFloat, double highFloat) {
 		final BigDecimal low = BigDecimal.valueOf(lowFloat);
 		final BigDecimal high = BigDecimal.valueOf(highFloat);
 		return new InBigRangeMatcher(low, high, false, true);
 	}
 
+    @Factory
 	public static <T> Matcher<Number> withinRange(Long low, Long high) {
 		return new InRangeIntegerMatcher(low, high, true, true);
 	}
 
+    @Factory
 	public static <T> Matcher<Number> withinExclusiveRange(Long low, Long high) {
 		return new InRangeIntegerMatcher(low, high, false, false);
 	}
 
+    @Factory
 	public static <T> Matcher<Number> withinInclusiveExclusiveRange(Long low, Long high) {
 		return new InRangeIntegerMatcher(low, high, true, false);
 	}
 
+    @Factory
 	public static <T> Matcher<Number> withinExclusiveInclusiveRange(Long low, Long high) {
 		return new InRangeIntegerMatcher(low, high, false, true);
 	}
+
+    @Factory
+	public static <T> Matcher<Number> integerValue() {
+		return new IntegerMatcher();
+	}
+
+    private NumericMatchers() {
+        throw new AssertionError();
+    }
 
 }

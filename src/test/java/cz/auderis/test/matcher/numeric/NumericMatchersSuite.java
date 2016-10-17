@@ -6,7 +6,9 @@ import org.junit.runners.Suite;
 @RunWith(Suite.class)
 @Suite.SuiteClasses({
 		InRangeMatcherTest.class,
-		InBigRangeMatcherTest.class
+		InBigRangeMatcherTest.class,
+		BigDecPropertyMatcherTest.class,
+        BigDecRoundingMatcherTest.class
 })
 public class NumericMatchersSuite {
 

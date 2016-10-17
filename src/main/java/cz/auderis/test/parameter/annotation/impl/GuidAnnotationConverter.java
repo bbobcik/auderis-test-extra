@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 Boleslav Bobcik - Auderis
+ * Copyright 2015-2016 Boleslav Bobcik - Auderis
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,27 +14,24 @@
  * limitations under the License.
  */
 
-package cz.auderis.test.parameter.convert;
+package cz.auderis.test.parameter.annotation.impl;
 
-import cz.auderis.test.matcher.date.DateHelper;
+import cz.auderis.test.parameter.annotation.Guid;
 import junitparams.converters.ConversionFailedException;
+import junitparams.converters.Converter;
 
-import java.util.Date;
+import java.util.UUID;
 
-@Deprecated
-public class DateConverter extends AbstractTypeConverter<Date> {
+public class GuidAnnotationConverter implements Converter<Guid, UUID> {
 
-	public DateConverter() {
-		super(Date.class);
-	}
+    @Override
+    public void initialize(Guid annotation) {
+        // Nothing to do
+    }
 
-	@Override
-	protected Date fromString(String objText, String option) throws ConversionFailedException {
-		try {
-			return DateHelper.parseDateAllowingNull(objText, option);
-		} catch (IllegalArgumentException e) {
-			throw new ConversionFailedException("Cannot parse date '" + objText + "': " + e.getMessage());
-		}
-	}
+    @Override
+    public UUID convert(Object param) throws ConversionFailedException {
+        return UUID.fromString(param.toString());
+    }
 
 }
