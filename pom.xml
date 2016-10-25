@@ -78,6 +78,14 @@
 			<version>1.0.0</version>
 			<scope>test</scope>
 		</dependency>
+		<!-- Supported frameworks that should be provided by a target environment if relevant functionality is needed -->
+		<dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>slf4j-api</artifactId>
+			<version>[1.7,)</version>
+			<scope>provided</scope>
+			<optional>true</optional>
+		</dependency>
 	</dependencies>
 
 	<prerequisites>
@@ -94,6 +102,30 @@
 
 	<build>
 		<plugins>
+			<plugin>
+				<artifactId>maven-antrun-plugin</artifactId>
+				<version>1.8</version>
+				<executions>
+					<execution>
+						<phase>process-classes</phase>
+						<configuration>
+							<target>
+<!--
+								<move
+										file="${build.outputDirectory}/org/slf4j/impl/StaticLoggerBinder.class"
+								        tofile="${build.outputDirectory}/cz/auderis/test/logging/slf4j/binder.class.bin"
+								/>
+								<delete dir="${build.outputDirectory}/org" quiet="true"/>
+-->
+							</target>
+						</configuration>
+						<goals>
+							<goal>run</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+
 			<plugin>
 				<artifactId>maven-release-plugin</artifactId>
 				<version>2.5.2</version>
