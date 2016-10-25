@@ -16,6 +16,7 @@
 
 package cz.auderis.test.rule;
 
+import cz.auderis.test.logging.jboss.JBossLoggingInitializer;
 import cz.auderis.test.logging.slf4j.Slf4jInitializer;
 import org.junit.rules.ExternalResource;
 
@@ -26,6 +27,8 @@ public class LogFramework extends ExternalResource {
     public static LogFramework slf4j() {
         return new LogFramework(Flavour.SLF4J);
     }
+
+    public static LogFramework jboss() { return new LogFramework(Flavour.JBOSS); }
 
     private LogFramework(Flavour loggingFlavour) {
         this.loggingFlavour = loggingFlavour;
@@ -44,7 +47,13 @@ public class LogFramework extends ExternalResource {
             Runnable getInitializer() {
                 return new Slf4jInitializer();
             }
-        }
+        },
+        JBOSS {
+            @Override
+            Runnable getInitializer() {
+                return new JBossLoggingInitializer();
+            }
+        },
         ;
 
         abstract Runnable getInitializer();
