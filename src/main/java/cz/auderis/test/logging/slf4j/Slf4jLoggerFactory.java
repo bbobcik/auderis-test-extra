@@ -18,26 +18,27 @@ package cz.auderis.test.logging.slf4j;
 
 import org.slf4j.ILoggerFactory;
 import org.slf4j.Logger;
+import org.slf4j.helpers.NOPLoggerFactory;
 
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
-public class TestLoggerFactory implements ILoggerFactory {
+public class Slf4jLoggerFactory extends NOPLoggerFactory {
 
-    final ConcurrentMap<String, TestLoggerAdapter> loggerMap;
+    final ConcurrentMap<String, Slf4jLoggerAdapter> loggerMap;
 
-    public TestLoggerFactory() {
-        loggerMap = new ConcurrentHashMap<String, TestLoggerAdapter>(16);
+    public Slf4jLoggerFactory() {
+        loggerMap = new ConcurrentHashMap<String, Slf4jLoggerAdapter>(16);
     }
 
     @Override
     public Logger getLogger(String loggerName) {
-        final TestLoggerAdapter logger = loggerMap.get(loggerName);
+        final Slf4jLoggerAdapter logger = loggerMap.get(loggerName);
         if (null != logger) {
             return logger;
         }
-        final TestLoggerAdapter newLogger = new TestLoggerAdapter(loggerName);
-        final TestLoggerAdapter oldLogger = loggerMap.putIfAbsent(loggerName, newLogger);
+        final Slf4jLoggerAdapter newLogger = new Slf4jLoggerAdapter(loggerName);
+        final Slf4jLoggerAdapter oldLogger = loggerMap.putIfAbsent(loggerName, newLogger);
         return (null != oldLogger) ? oldLogger : newLogger;
     }
 

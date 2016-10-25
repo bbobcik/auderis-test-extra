@@ -25,9 +25,9 @@ import org.slf4j.helpers.MessageFormatter;
 
 import java.util.Arrays;
 
-public class TestLoggerAdapter extends MarkerIgnoringBase {
+public class Slf4jLoggerAdapter extends MarkerIgnoringBase {
 
-    public TestLoggerAdapter(String name) {
+    public Slf4jLoggerAdapter(String name) {
         this.name = name;
     }
 
