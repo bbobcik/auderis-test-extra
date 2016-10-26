@@ -18,13 +18,14 @@ package cz.auderis.test.matcher.log;
 
 import cz.auderis.test.logging.LogLevel;
 import cz.auderis.test.logging.LogRecord;
-import org.hamcrest.CoreMatchers;
 import org.hamcrest.Description;
 import org.hamcrest.Factory;
 import org.hamcrest.Matcher;
 import org.hamcrest.TypeSafeMatcher;
 
 import java.util.Date;
+
+import static org.hamcrest.CoreMatchers.is;
 
 /**
  * Created on 24.10.2016.
@@ -138,7 +139,17 @@ public class LogRecordMatcher extends TypeSafeMatcher<LogRecord> {
 
     @Factory
     public static Matcher<? super LogRecord> hasName(String name) {
-        return new LogRecordMatcher(null, null, CoreMatchers.is(name), null);
+        return new LogRecordMatcher(null, null, is(name), null);
+    }
+
+    @Factory
+    public static Matcher<? super LogRecord> hasLevel(Matcher<? super LogLevel> levelMatcher) {
+        return new LogRecordMatcher(null, levelMatcher, null, null);
+    }
+
+    @Factory
+    public static Matcher<? super LogRecord> hasLevel(LogLevel level) {
+        return new LogRecordMatcher(null, is(level), null, null);
     }
 
     @Factory
@@ -148,7 +159,7 @@ public class LogRecordMatcher extends TypeSafeMatcher<LogRecord> {
 
     @Factory
     public static Matcher<? super LogRecord> hasMessage(String message) {
-        return new LogRecordMatcher(null, null, null, CoreMatchers.is(message));
+        return new LogRecordMatcher(null, null, null, is(message));
     }
 
 }

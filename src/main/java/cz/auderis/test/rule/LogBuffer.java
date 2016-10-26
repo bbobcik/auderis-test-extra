@@ -21,6 +21,7 @@ import cz.auderis.test.logging.LogLevel;
 import cz.auderis.test.logging.LogLevelConfiguration;
 import cz.auderis.test.logging.LogRecord;
 import cz.auderis.test.logging.LogRecordCollector;
+import org.hamcrest.Matcher;
 import org.junit.rules.TestWatcher;
 import org.junit.runner.Description;
 
@@ -81,6 +82,22 @@ public class LogBuffer extends TestWatcher {
     public List<LogRecord> getRecords() {
         final LogRecordCollector collector = LogRecordCollector.RECORD_COLLECTORS.get();
         return new ArrayList<LogRecord>(collector.getRecords());
+    }
+
+    public List<LogRecord> getRecords(Matcher<? super LogRecord> recordMatcher) {
+        final LogRecordCollector collector = LogRecordCollector.RECORD_COLLECTORS.get();
+        final List<LogRecord> allRecords = collector.getRecords();
+        final List<LogRecord> result = new ArrayList<LogRecord>(allRecords.size());
+        if ((null == recordMatcher) || allRecords.isEmpty()) {
+            result.addAll(allRecords);
+        } else {
+            for (final LogRecord record : allRecords) {
+                if (recordMatcher.matches(record)) {
+                    result.add(record);
+                }
+            }
+        }
+        return result;
     }
 
     @Override
