@@ -16,7 +16,6 @@
 
 package cz.auderis.test.matcher.numeric;
 
-import cz.auderis.test.parameter.annotation.BigDec;
 import org.hamcrest.Factory;
 import org.hamcrest.Matcher;
 

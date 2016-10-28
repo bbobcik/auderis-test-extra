@@ -18,7 +18,6 @@ package cz.auderis.test.parameter.annotation.impl;
 
 import cz.auderis.test.matcher.date.DateHelper;
 import cz.auderis.test.parameter.annotation.CalendarParam;
-import cz.auderis.test.parameter.annotation.DateParam;
 import junitparams.converters.ConversionFailedException;
 import junitparams.converters.Converter;
 

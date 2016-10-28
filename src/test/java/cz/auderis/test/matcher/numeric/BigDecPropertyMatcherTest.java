@@ -20,7 +20,6 @@ import cz.auderis.test.parameter.annotation.BigDec;
 import junitparams.JUnitParamsRunner;
 import junitparams.Parameters;
 import org.hamcrest.Matcher;
-import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 

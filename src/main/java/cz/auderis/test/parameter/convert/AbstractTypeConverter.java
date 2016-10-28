@@ -19,6 +19,7 @@ package cz.auderis.test.parameter.convert;
 import junitparams.converters.ConversionFailedException;
 import junitparams.converters.ParamConverter;
 
+@Deprecated
 public abstract class AbstractTypeConverter<T> implements ParamConverter<T> {
 
 	protected final Class<T> targetClass;

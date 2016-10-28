@@ -17,7 +17,6 @@
 package cz.auderis.test.parameter.annotation;
 
 import cz.auderis.test.parameter.annotation.impl.CalendarParamAnnotationConverter;
-import cz.auderis.test.parameter.annotation.impl.DateParamAnnotationConverter;
 import junitparams.converters.Param;
 
 import java.lang.annotation.ElementType;
