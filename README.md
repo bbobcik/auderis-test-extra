@@ -6,6 +6,10 @@ Useful additions to JUnit/Hamcrest testing environment.
 
 ## Changelog
 
+### 1.2.2
+
+* Switched build platform from Maven to Gradle
+
 ### 1.2.1
 * Support for tests of multidimensional arrays
   * `ArrayDimensionMatcher` with matcher factory methods for checking array dimensions

@@ -1,0 +1,175 @@
+/*
+ * Copyright 2015-2016 Boleslav Bobcik - Auderis
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+apply plugin: 'java'
+apply plugin: 'signing'
+apply plugin: 'maven'
+
+group 'cz.auderis'
+version '1.2.2-SNAPSHOT'
+ext.releaseBuild = !version.endsWith('-SNAPSHOT')
+
+compileJava {
+	sourceCompatibility = '1.7'
+	targetCompatibility = '1.7'
+}
+
+repositories {
+	mavenLocal()
+	mavenCentral()
+}
+
+configurations {
+	clientOptional {
+		description = 'Needs to be provided by client environment if the related functionality is wanted'
+	}
+}
+
+sourceSets {
+	main {
+		compileClasspath += configurations.clientOptional
+		runtimeClasspath += configurations.clientOptional
+	}
+	test {
+		compileClasspath += configurations.clientOptional
+		runtimeClasspath += configurations.clientOptional
+	}
+}
+
+dependencies {
+	compile 'org.hamcrest:hamcrest-core:1.3'
+	compile('pl.pragmatists:JUnitParams:1.0.5') {
+		exclude group: 'junit'
+	}
+	compile('junit:junit:4.12') {
+		exclude group: 'org.hamcrest'
+	}
+	clientOptional 'org.slf4j:slf4j-api:1.7+'
+	clientOptional 'org.jboss.logging:jboss-logging:3.3.0.Final'
+	testCompile 'org.hamcrest:hamcrest-all:1.3'
+	testCompile 'cz.auderis:auderis-test-category:1.0.1'
+}
+
+tasks.javadoc.classpath = sourceSets.main.compileClasspath
+
+task javadocJar(type: Jar, dependsOn: javadoc) {
+	classifier = 'javadoc'
+	from tasks.javadoc.destinationDir
+}
+
+task sourcesJar(type: Jar) {
+	from sourceSets.main.allSource
+	classifier = 'sources'
+}
+
+artifacts {
+	archives jar
+	archives javadocJar
+	archives sourcesJar
+}
+
+if (releaseBuild) {
+	if (!LOCAL_CREDENTIALS.sonatype) {
+		throw new InvalidUserDataException("Sonatype credentials not defined (check LOCAL_CREDENTIALS.sonatype definition)")
+		/**
+		 * Recommended setup for credentials: create file ~/.gradle/init.d/credentials.gradle with the following
+		 * contents:
+		 * <pre>
+		 *   rootProject {
+		 *     ext.LOCAL_CREDENTIALS = [
+		 *       sonatype: [
+		 *         userName: '...',
+		 *         password: '...'
+		 *       ],
+		 *     ]
+		 *   }
+		 * </pre>
+		 */
+	}
+	signing {
+		sign configurations.archives
+	}
+} else {
+	task signArchives << {
+		logger.info("Non-release build, signing not performed")
+	}
+}
+
+uploadArchives {
+	repositories {
+		if (releaseBuild) {
+			mavenDeployer {
+				beforeDeployment { MavenDeployment deployment -> signing.signPom(deployment) }
+
+				repository(url: "https://oss.sonatype.orgx/service/local/staging/deploy/maven2/") {
+					authentication(userName: LOCAL_CREDENTIALS.sonatype.userName, password: LOCAL_CREDENTIALS.sonatype.password)
+				}
+
+				pom.project {
+					name 'Auderis Test - extra components'
+					description 'Auderis Test - additions for JUnit/Hamcrest environment'
+					url 'https://github.com/bbobcik/auderis-test-extra'
+					inceptionYear 2015
+					packaging 'jar'
+
+					organization {
+						name = 'Boleslav Bobcik - Auderis'
+					}
+
+					developers {
+						developer {
+							name = 'Boleslav Bobcik'
+							email = 'bbobcik@gmail.com'
+							organization = 'Auderis'
+							organizationUrl = 'https://github.com/bbobcik'
+							timezone = 1
+						}
+					}
+
+					licenses {
+						license {
+							name = 'The Apache Software License, Version 2.0'
+							url = 'http://www.apache.org/licenses/LICENSE-2.0.txt'
+						}
+					}
+
+					scm {
+						url 'git@github.com:bbobcik/auderis-test-extra.git'
+						connection 'scm:git:git@github.com:bbobcik/auderis-test-extra.git'
+						developerConnection 'scm:git:git@github.com:bbobcik/auderis-test-extra.git'
+						tag 'HEAD'
+					}
+				}.withXml {
+					asNode().dependencies.'*'.findAll() {
+						it.scope.text() == 'clientOptional'
+					}.each {
+						it.scope*.value = 'providedXX'
+					}
+				}
+			}
+		} else {
+			mavenLocal()
+		}
+	}
+}
+
+uploadArchives.doFirst {
+	if (releaseBuild) {
+		logger.lifecycle("Release build - uploading artifacts to OSS Sonatype Nexus")
+	} else {
+		logger.lifecycle("Non-release build - uploading artifacts to Maven Local")
+	}
+}
