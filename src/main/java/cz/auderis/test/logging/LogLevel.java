@@ -16,6 +16,8 @@
 
 package cz.auderis.test.logging;
 
+import java.util.Collection;
+import java.util.Collections;
 import java.util.EnumSet;
 
 public enum LogLevel {
@@ -50,6 +52,13 @@ public enum LogLevel {
 
     public EnumSet<LogLevel> plusLowerLevels() {
         return EnumSet.range(this, TRACE);
+    }
+
+    public static LogLevel lowestLevel(Collection<LogLevel> levels) {
+        if (levels.isEmpty()) {
+            return FATAL;
+        }
+        return Collections.min(levels);
     }
 
 }

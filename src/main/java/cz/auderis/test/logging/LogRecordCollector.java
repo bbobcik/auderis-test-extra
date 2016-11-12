@@ -23,34 +23,35 @@ import java.util.EnumSet;
 import java.util.List;
 import java.util.Set;
 
-/**
- * Created on 23.10.2016.
- */
 public class LogRecordCollector {
 
-    public static final ThreadLocal<LogRecordCollector> RECORD_COLLECTORS = initRecordCollectors();
     private static final EnumSet<LogLevel> INITIAL_LEVELS_INTERNAL = LogLevel.DEBUG.plusHigherLevels();
     public static final Set<LogLevel> INITIAL_LOG_LEVELS = Collections.unmodifiableSet(INITIAL_LEVELS_INTERNAL);
+    public static final LogRecordCollector RECORD_COLLECTOR = new LogRecordCollector();
 
     private final List<LogRecord> collectedRecords;
     private final EnumSet<LogLevel> enabledLevels;
 
-    public LogRecordCollector() {
+    LogRecordCollector() {
         collectedRecords = new ArrayList<LogRecord>(1024);
         enabledLevels = EnumSet.copyOf(INITIAL_LEVELS_INTERNAL);
     }
 
-    public void reset() {
+    public synchronized void reset() {
         collectedRecords.clear();
-        enabledLevels.clear();;
+        enabledLevels.clear();
         enabledLevels.addAll(INITIAL_LEVELS_INTERNAL);
     }
 
-    public Set<LogLevel> getEnabledLevels() {
+    public synchronized boolean isLevelEnabled(LogLevel level) {
+        return enabledLevels.contains(level);
+    }
+
+    public synchronized Set<LogLevel> getEnabledLevels() {
         return EnumSet.copyOf(enabledLevels);
     }
 
-    public void setEnabledLevels(Set<LogLevel> newLevels) {
+    public synchronized void setEnabledLevels(Set<LogLevel> newLevels) {
         if (null == newLevels) {
             throw new NullPointerException();
         }
@@ -58,17 +59,17 @@ public class LogRecordCollector {
         enabledLevels.addAll(newLevels);
     }
 
-    public void add(LogRecord record) {
+    public synchronized void add(LogRecord record) {
         if (enabledLevels.contains(record.getLevel())) {
             collectedRecords.add(record);
         }
     }
 
-    public List<LogRecord> getRecords() {
-        return collectedRecords;
+    public synchronized List<LogRecord> getRecords() {
+        return new ArrayList<>(collectedRecords);
     }
 
-    public void dump(PrintStream out, LogLevel threshold) {
+    public synchronized void dump(PrintStream out, LogLevel threshold) {
         final Set<LogLevel> dumpLevels = threshold.plusHigherLevels();
         for (final LogRecord record : collectedRecords) {
             final LogLevel level = record.getLevel();
@@ -77,15 +78,6 @@ public class LogRecordCollector {
             }
             // TODO
         }
-    }
-
-    private static ThreadLocal<LogRecordCollector> initRecordCollectors() {
-        return new ThreadLocal<LogRecordCollector>() {
-            @Override
-            protected LogRecordCollector initialValue() {
-                return new LogRecordCollector();
-            }
-        };
     }
 
 }

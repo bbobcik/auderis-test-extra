@@ -25,31 +25,30 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 import org.junit.runner.RunWith;
-import org.test.temp.log.Slf4jStaticTester;
+import org.test.temp.log.Log4jStaticTester;
 
 import java.util.List;
 
 import static cz.auderis.test.matcher.log.LogRecordMatcher.hasLevel;
 import static cz.auderis.test.matcher.log.LogRecordMatcher.hasMessage;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.collection.IsCollectionWithSize.hasSize;
+import static org.hamcrest.Matchers.hasSize;
 
 @RunWith(JUnitParamsRunner.class)
-public class Slf4jLoggingRuleTest {
+public class Log4jLoggingRuleTest {
 
     @ClassRule
-    public static LogFramework logFramework = LogFramework.slf4j();
+    public static LogFramework logFramework = LogFramework.log4j();
 
     @Rule
     public LogBuffer logBuffer = new LogBuffer();
 
-
     @Test
     @Category(SanityTest.class)
-    public void shouldInterceptSlf4jLogging() throws Exception {
+    public void shouldInterceptLog4j() throws Exception {
         // Given
         logBuffer.levels().enableOnly(LogLevel.INFO.plusHigherLevels());
-        Slf4jStaticTester tester = new Slf4jStaticTester();
+        Log4jStaticTester tester = new Log4jStaticTester();
 
         // When
         tester.doWork();
@@ -59,7 +58,7 @@ public class Slf4jLoggingRuleTest {
         assertThat(infoRecords, hasSize(1));
         final LogRecord logRecord = infoRecords.get(0);
         assertThat(logRecord, hasLevel(LogLevel.INFO));
-        assertThat(logRecord, hasMessage("SLF4J : Work 3"));
+        assertThat(logRecord, hasMessage("LOG4J : Work 3"));
     }
 
 }

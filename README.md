@@ -8,7 +8,11 @@ Useful additions to JUnit/Hamcrest testing environment.
 
 ### 1.2.2
 
-* Switched build platform from Maven to Gradle
+* Build platform switched from Maven to Gradle
+* Logging output testing extended
+  * Added support for [Log4J 1.2.x](http://logging.apache.org/log4j/1.2)
+  * Multiple logging frameworks can be captured at the same time (e.g. using `LogFramework.everything()`)
+  * When requested logging framework is not on classpath, its capturing is disabled
 
 ### 1.2.1
 * Support for tests of multidimensional arrays

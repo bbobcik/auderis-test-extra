@@ -80,12 +80,12 @@ public class LogBuffer extends TestWatcher {
     }
 
     public List<LogRecord> getRecords() {
-        final LogRecordCollector collector = LogRecordCollector.RECORD_COLLECTORS.get();
+        final LogRecordCollector collector = LogRecordCollector.RECORD_COLLECTOR;
         return new ArrayList<LogRecord>(collector.getRecords());
     }
 
     public List<LogRecord> getRecords(Matcher<? super LogRecord> recordMatcher) {
-        final LogRecordCollector collector = LogRecordCollector.RECORD_COLLECTORS.get();
+        final LogRecordCollector collector = LogRecordCollector.RECORD_COLLECTOR;
         final List<LogRecord> allRecords = collector.getRecords();
         final List<LogRecord> result = new ArrayList<LogRecord>(allRecords.size());
         if ((null == recordMatcher) || allRecords.isEmpty()) {
@@ -116,7 +116,7 @@ public class LogBuffer extends TestWatcher {
     }
 
     private void resetLogging() {
-        final LogRecordCollector collector = LogRecordCollector.RECORD_COLLECTORS.get();
+        final LogRecordCollector collector = LogRecordCollector.RECORD_COLLECTOR;
         collector.reset();
         enabledLevels.clear();
         enabledLevels.addAll(collector.getEnabledLevels());
@@ -126,7 +126,7 @@ public class LogBuffer extends TestWatcher {
         if (null == threshold) {
             return;
         }
-        final LogRecordCollector collector = LogRecordCollector.RECORD_COLLECTORS.get();
+        final LogRecordCollector collector = LogRecordCollector.RECORD_COLLECTOR;
         collector.dump(System.out, threshold);
     }
 
@@ -139,7 +139,7 @@ public class LogBuffer extends TestWatcher {
         @Override
         protected void levelSetChanged() {
             super.levelSetChanged();
-            LogRecordCollector.RECORD_COLLECTORS.get().setEnabledLevels(enabledLevels);
+            LogRecordCollector.RECORD_COLLECTOR.setEnabledLevels(enabledLevels);
         }
     }
 

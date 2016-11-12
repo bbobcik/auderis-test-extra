@@ -14,21 +14,18 @@
  * limitations under the License.
  */
 
-package org.test.temp.log;
+package cz.auderis.test.logging.log4j;
 
-import org.jboss.logging.Logger;
+import org.apache.log4j.spi.LoggerRepository;
+import org.apache.log4j.spi.RepositorySelector;
 
-public class JBossStaticTester {
+class Log4jRepositorySelector implements RepositorySelector {
 
-    private static final Logger LOG = Logger.getLogger(JBossStaticTester.class);
+    static final Log4jRepositorySelector INSTANCE = new Log4jRepositorySelector();
 
-    public void doWork() {
-        LOG.trace("JBOSS : Work 1");
-        LOG.debug("JBOSS : Work 2");
-        LOG.info("JBOSS : Work 3");
-        LOG.warn("JBOSS : Work 4");
-        LOG.error("JBOSS : Work 5");
-        LOG.fatal("JBOSS : Work 6");
+    @Override
+    public LoggerRepository getLoggerRepository() {
+        return Log4jLoggerRepository.INSTANCE;
     }
 
 }

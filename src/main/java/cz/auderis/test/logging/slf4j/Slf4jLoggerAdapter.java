@@ -32,8 +32,8 @@ public class Slf4jLoggerAdapter extends MarkerIgnoringBase {
     }
 
     private boolean isLevelEnabled(LogLevel level) {
-        final LogRecordCollector recordCollector = LogRecordCollector.RECORD_COLLECTORS.get();
-        return recordCollector.getEnabledLevels().contains(level);
+        final LogRecordCollector recordCollector = LogRecordCollector.RECORD_COLLECTOR;
+        return recordCollector.isLevelEnabled(level);
     }
 
     @Override
@@ -62,8 +62,8 @@ public class Slf4jLoggerAdapter extends MarkerIgnoringBase {
     }
 
     private void log(LogLevel currentLevel, String s, Object o) {
-        final LogRecordCollector recordCollector = LogRecordCollector.RECORD_COLLECTORS.get();
-        if (recordCollector.getEnabledLevels().contains(currentLevel)) {
+        final LogRecordCollector recordCollector = LogRecordCollector.RECORD_COLLECTOR;
+        if (recordCollector.isLevelEnabled(currentLevel)) {
             assert !(o instanceof Throwable);
             final String msg = render(s, o);
             recordCollector.add(new LogRecord(currentLevel, name, msg, null));
@@ -71,8 +71,8 @@ public class Slf4jLoggerAdapter extends MarkerIgnoringBase {
     }
 
     private void log(LogLevel currentLevel, String s, Object o1, Object o2) {
-        final LogRecordCollector recordCollector = LogRecordCollector.RECORD_COLLECTORS.get();
-        if (recordCollector.getEnabledLevels().contains(currentLevel)) {
+        final LogRecordCollector recordCollector = LogRecordCollector.RECORD_COLLECTOR;
+        if (recordCollector.isLevelEnabled(currentLevel)) {
             final String msg;
             final Throwable cause;
             if (o2 instanceof Throwable) {
@@ -87,8 +87,8 @@ public class Slf4jLoggerAdapter extends MarkerIgnoringBase {
     }
 
     private void log(LogLevel currentLevel, String s, Object[] objects) {
-        final LogRecordCollector recordCollector = LogRecordCollector.RECORD_COLLECTORS.get();
-        if (recordCollector.getEnabledLevels().contains(currentLevel)) {
+        final LogRecordCollector recordCollector = LogRecordCollector.RECORD_COLLECTOR;
+        if (recordCollector.isLevelEnabled(currentLevel)) {
             final String msg;
             final Throwable cause;
             if ((0 != objects.length) && (objects[objects.length - 1] instanceof Throwable)) {
@@ -105,8 +105,8 @@ public class Slf4jLoggerAdapter extends MarkerIgnoringBase {
     @Override
     public void trace(String s) {
         final LogLevel currentLevel = LogLevel.TRACE;
-        final LogRecordCollector recordCollector = LogRecordCollector.RECORD_COLLECTORS.get();
-        if (recordCollector.getEnabledLevels().contains(currentLevel)) {
+        final LogRecordCollector recordCollector = LogRecordCollector.RECORD_COLLECTOR;
+        if (recordCollector.isLevelEnabled(currentLevel)) {
             recordCollector.add(new LogRecord(currentLevel, name, s, null));
         }
     }
@@ -114,8 +114,8 @@ public class Slf4jLoggerAdapter extends MarkerIgnoringBase {
     @Override
     public void trace(String s, Throwable throwable) {
         final LogLevel currentLevel = LogLevel.TRACE;
-        final LogRecordCollector recordCollector = LogRecordCollector.RECORD_COLLECTORS.get();
-        if (recordCollector.getEnabledLevels().contains(currentLevel)) {
+        final LogRecordCollector recordCollector = LogRecordCollector.RECORD_COLLECTOR;
+        if (recordCollector.isLevelEnabled(currentLevel)) {
             recordCollector.add(new LogRecord(currentLevel, name, s, throwable));
         }
     }
@@ -138,8 +138,8 @@ public class Slf4jLoggerAdapter extends MarkerIgnoringBase {
     @Override
     public void debug(String s) {
         final LogLevel currentLevel = LogLevel.DEBUG;
-        final LogRecordCollector recordCollector = LogRecordCollector.RECORD_COLLECTORS.get();
-        if (recordCollector.getEnabledLevels().contains(currentLevel)) {
+        final LogRecordCollector recordCollector = LogRecordCollector.RECORD_COLLECTOR;
+        if (recordCollector.isLevelEnabled(currentLevel)) {
             recordCollector.add(new LogRecord(currentLevel, name, s, null));
         }
     }
@@ -147,8 +147,8 @@ public class Slf4jLoggerAdapter extends MarkerIgnoringBase {
     @Override
     public void debug(String s, Throwable throwable) {
         final LogLevel currentLevel = LogLevel.DEBUG;
-        final LogRecordCollector recordCollector = LogRecordCollector.RECORD_COLLECTORS.get();
-        if (recordCollector.getEnabledLevels().contains(currentLevel)) {
+        final LogRecordCollector recordCollector = LogRecordCollector.RECORD_COLLECTOR;
+        if (recordCollector.isLevelEnabled(currentLevel)) {
             recordCollector.add(new LogRecord(currentLevel, name, s, throwable));
         }
     }
@@ -171,8 +171,8 @@ public class Slf4jLoggerAdapter extends MarkerIgnoringBase {
     @Override
     public void info(String s) {
         final LogLevel currentLevel = LogLevel.INFO;
-        final LogRecordCollector recordCollector = LogRecordCollector.RECORD_COLLECTORS.get();
-        if (recordCollector.getEnabledLevels().contains(currentLevel)) {
+        final LogRecordCollector recordCollector = LogRecordCollector.RECORD_COLLECTOR;
+        if (recordCollector.isLevelEnabled(currentLevel)) {
             recordCollector.add(new LogRecord(currentLevel, name, s, null));
         }
     }
@@ -180,8 +180,8 @@ public class Slf4jLoggerAdapter extends MarkerIgnoringBase {
     @Override
     public void info(String s, Throwable throwable) {
         final LogLevel currentLevel = LogLevel.INFO;
-        final LogRecordCollector recordCollector = LogRecordCollector.RECORD_COLLECTORS.get();
-        if (recordCollector.getEnabledLevels().contains(currentLevel)) {
+        final LogRecordCollector recordCollector = LogRecordCollector.RECORD_COLLECTOR;
+        if (recordCollector.isLevelEnabled(currentLevel)) {
             recordCollector.add(new LogRecord(currentLevel, name, s, throwable));
         }
     }
@@ -204,8 +204,8 @@ public class Slf4jLoggerAdapter extends MarkerIgnoringBase {
     @Override
     public void warn(String s) {
         final LogLevel currentLevel = LogLevel.WARNING;
-        final LogRecordCollector recordCollector = LogRecordCollector.RECORD_COLLECTORS.get();
-        if (recordCollector.getEnabledLevels().contains(currentLevel)) {
+        final LogRecordCollector recordCollector = LogRecordCollector.RECORD_COLLECTOR;
+        if (recordCollector.isLevelEnabled(currentLevel)) {
             recordCollector.add(new LogRecord(currentLevel, name, s, null));
         }
     }
@@ -213,8 +213,8 @@ public class Slf4jLoggerAdapter extends MarkerIgnoringBase {
     @Override
     public void warn(String s, Throwable throwable) {
         final LogLevel currentLevel = LogLevel.WARNING;
-        final LogRecordCollector recordCollector = LogRecordCollector.RECORD_COLLECTORS.get();
-        if (recordCollector.getEnabledLevels().contains(currentLevel)) {
+        final LogRecordCollector recordCollector = LogRecordCollector.RECORD_COLLECTOR;
+        if (recordCollector.isLevelEnabled(currentLevel)) {
             recordCollector.add(new LogRecord(currentLevel, name, s, throwable));
         }
     }
@@ -237,8 +237,8 @@ public class Slf4jLoggerAdapter extends MarkerIgnoringBase {
     @Override
     public void error(String s) {
         final LogLevel currentLevel = LogLevel.ERROR;
-        final LogRecordCollector recordCollector = LogRecordCollector.RECORD_COLLECTORS.get();
-        if (recordCollector.getEnabledLevels().contains(currentLevel)) {
+        final LogRecordCollector recordCollector = LogRecordCollector.RECORD_COLLECTOR;
+        if (recordCollector.isLevelEnabled(currentLevel)) {
             recordCollector.add(new LogRecord(currentLevel, name, s, null));
         }
     }
@@ -246,8 +246,8 @@ public class Slf4jLoggerAdapter extends MarkerIgnoringBase {
     @Override
     public void error(String s, Throwable throwable) {
         final LogLevel currentLevel = LogLevel.ERROR;
-        final LogRecordCollector recordCollector = LogRecordCollector.RECORD_COLLECTORS.get();
-        if (recordCollector.getEnabledLevels().contains(currentLevel)) {
+        final LogRecordCollector recordCollector = LogRecordCollector.RECORD_COLLECTOR;
+        if (recordCollector.isLevelEnabled(currentLevel)) {
             recordCollector.add(new LogRecord(currentLevel, name, s, throwable));
         }
     }

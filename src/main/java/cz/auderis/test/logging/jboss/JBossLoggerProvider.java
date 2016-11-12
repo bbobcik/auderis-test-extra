@@ -72,7 +72,7 @@ public class JBossLoggerProvider implements LoggerProvider {
 
     @Override
     public Map<String, Object> getMdcMap() {
-        return new HashMap(mdc);
+        return new HashMap<>(mdc);
     }
 
     @Override

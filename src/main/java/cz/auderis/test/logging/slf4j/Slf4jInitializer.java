@@ -16,42 +16,64 @@
 
 package cz.auderis.test.logging.slf4j;
 
+import cz.auderis.test.logging.LogCaptureInitializer;
+
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 
-public class Slf4jInitializer implements Runnable {
+public class Slf4jInitializer implements LogCaptureInitializer {
+
+    private static boolean INITIALIZED = false;
 
     @Override
-    public void run() {
-        final Field modifiersField;
+    public boolean isFrameworkPresent() {
         try {
-            modifiersField = Field.class.getDeclaredField("modifiers");
-            modifiersField.setAccessible(true);
-        } catch (Exception e) {
-            throw new RuntimeException("Cannot intercept SLF4J framework", e);
-        }
-        final Slf4jLoggerFactory testLoggerFactory = new Slf4jLoggerFactory();
-        try {
-            // Intercept fallback NOP factory
-            final Class<?> apiFactoryClass = Class.forName("org.slf4j.LoggerFactory");
-            final Field factoryField = apiFactoryClass.getDeclaredField("NOP_FALLBACK_FACTORY");
-            factoryField.setAccessible(true);
-            modifiersField.setInt(factoryField, factoryField.getModifiers() & ~Modifier.FINAL);
-            factoryField.set(null, testLoggerFactory);
-            // Make sure that NOP fallback factory will be unconditionally used
-            final Field fallbackField = apiFactoryClass.getDeclaredField("NOP_FALLBACK_INITIALIZATION");
-            fallbackField.setAccessible(true);
-            final int fallbackStateValue = fallbackField.getInt(null);
-            final Field stateField = apiFactoryClass.getDeclaredField("INITIALIZATION_STATE");
-            stateField.setAccessible(true);
-            modifiersField.setInt(stateField, stateField.getModifiers() & ~Modifier.FINAL);
-            stateField.setInt(null, fallbackStateValue);
+            final Class<?> frameworkClass = Class.forName("org.slf4j.LoggerFactory");
+            assert null != frameworkClass;
         } catch (ClassNotFoundException e) {
-            throw new RuntimeException("SLF4J framework not detected");
-        } catch (NoSuchFieldException e) {
-            throw new RuntimeException("Unsupported SLF4J framework API version");
-        } catch (Exception e) {
-            throw new RuntimeException("Failed to intercept SLF4J provider", e);
+            return false;
+        }
+        return true;
+    }
+
+    @Override
+    public void initialize() throws Exception {
+        synchronized (Slf4jInitializer.class) {
+            if (INITIALIZED) {
+                return;
+            }
+            final Field modifiersField;
+            try {
+                modifiersField = Field.class.getDeclaredField("modifiers");
+                modifiersField.setAccessible(true);
+            } catch (Exception e) {
+                throw new RuntimeException("Cannot intercept SLF4J framework", e);
+            }
+            final Slf4jLoggerFactory testLoggerFactory = new Slf4jLoggerFactory();
+            try {
+                // Intercept fallback NOP factory
+                final Class<?> apiFactoryClass = Class.forName("org.slf4j.LoggerFactory");
+                final Field factoryField = apiFactoryClass.getDeclaredField("NOP_FALLBACK_FACTORY");
+                factoryField.setAccessible(true);
+                modifiersField.setInt(factoryField, factoryField.getModifiers() & ~Modifier.FINAL);
+                factoryField.set(null, testLoggerFactory);
+                // Make sure that NOP fallback factory will be unconditionally used
+                final Field fallbackField = apiFactoryClass.getDeclaredField("NOP_FALLBACK_INITIALIZATION");
+                fallbackField.setAccessible(true);
+                final int fallbackStateValue = fallbackField.getInt(null);
+                final Field stateField = apiFactoryClass.getDeclaredField("INITIALIZATION_STATE");
+                stateField.setAccessible(true);
+                modifiersField.setInt(stateField, stateField.getModifiers() & ~Modifier.FINAL);
+                stateField.setInt(null, fallbackStateValue);
+            } catch (ClassNotFoundException e) {
+                throw new RuntimeException("SLF4J framework not detected");
+            } catch (NoSuchFieldException e) {
+                throw new RuntimeException("Unsupported SLF4J framework API version");
+            } catch (Exception e) {
+                throw new RuntimeException("Failed to intercept SLF4J provider", e);
+            } finally {
+                INITIALIZED = true;
+            }
         }
     }
 

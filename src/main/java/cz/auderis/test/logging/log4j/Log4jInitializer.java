@@ -14,21 +14,20 @@
  * limitations under the License.
  */
 
-package cz.auderis.test.logging.jboss;
+package cz.auderis.test.logging.log4j;
 
 import cz.auderis.test.logging.LogCaptureInitializer;
 
 import java.lang.reflect.Field;
-import java.lang.reflect.Modifier;
 
-public class JBossLoggingInitializer implements LogCaptureInitializer {
+public class Log4jInitializer implements LogCaptureInitializer {
 
     private static boolean INITIALIZED = false;
 
     @Override
     public boolean isFrameworkPresent() {
         try {
-            final Class<?> frameworkClass = Class.forName("org.jboss.logging.LoggerProviders");
+            final Class<?> frameworkClass = Class.forName("org.apache.log4j.LogManager");
             assert null != frameworkClass;
         } catch (ClassNotFoundException e) {
             return false;
@@ -38,29 +37,24 @@ public class JBossLoggingInitializer implements LogCaptureInitializer {
 
     @Override
     public void initialize() throws Exception {
-        synchronized (JBossLoggingInitializer.class) {
+        synchronized (Log4jInitializer.class) {
             if (INITIALIZED) {
                 return;
             }
-            final Field modifiersField;
             try {
-                modifiersField = Field.class.getDeclaredField("modifiers");
-                modifiersField.setAccessible(true);
-            } catch (Exception e) {
-                throw new RuntimeException("Cannot intercept JBoss Logging framework", e);
-            }
-            try {
-                final Class<?> providerClass = Class.forName("org.jboss.logging.LoggerProviders");
-                final Field providerField = providerClass.getDeclaredField("PROVIDER");
-                providerField.setAccessible(true);
-                modifiersField.setInt(providerField, providerField.getModifiers() & ~Modifier.FINAL);
-                providerField.set(null, JBossLoggerProvider.INSTANCE);
+                final Class<?> managerClass = Class.forName("org.apache.log4j.LogManager");
+                final Field selectorField = managerClass.getDeclaredField("repositorySelector");
+                selectorField.setAccessible(true);
+                selectorField.set(null, Log4jRepositorySelector.INSTANCE);
+                final Field guardField = managerClass.getDeclaredField("guard");
+                guardField.setAccessible(true);
+                guardField.set(null, new Object[0]);
             } catch (ClassNotFoundException e) {
-                throw new RuntimeException("JBoss Logging framework not detected");
+                throw new RuntimeException("Log4J framework not detected");
             } catch (NoSuchFieldException e) {
-                throw new RuntimeException("Unsupported version of JBoss Logging framework");
+                throw new RuntimeException("Unsupported version of Log4J framework");
             } catch (Exception e) {
-                throw new RuntimeException("Failed to intercept JBoss Logging provider", e);
+                throw new RuntimeException("Failed to intercept Log4J manager", e);
             } finally {
                 INITIALIZED = true;
             }

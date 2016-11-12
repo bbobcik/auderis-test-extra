@@ -59,7 +59,7 @@ public class JBossLoggingRuleTest {
         assertThat(infoRecords, hasSize(1));
         final LogRecord logRecord = infoRecords.get(0);
         assertThat(logRecord, hasLevel(LogLevel.INFO));
-        assertThat(logRecord, hasMessage("Work 3"));
+        assertThat(logRecord, hasMessage("JBOSS : Work 3"));
     }
 
 }

@@ -28,10 +28,10 @@ import java.util.Map;
 
 public class JBossLoggerAdapter extends Logger {
 
-    public static final Map<Level, LogLevel> JBOSS_TO_INTERNAL = prepareLevelMap1();
+    public static final Map<Level, LogLevel> JBOSS_TO_INTERNAL = prepareLevelMap();
 
-    private static Map<Level, LogLevel> prepareLevelMap1() {
-        final EnumMap levelMap = new EnumMap(Level.class);
+    private static Map<Level, LogLevel> prepareLevelMap() {
+        final EnumMap<Level, LogLevel> levelMap = new EnumMap<>(Level.class);
         levelMap.put(Level.TRACE, LogLevel.TRACE);
         levelMap.put(Level.DEBUG, LogLevel.DEBUG);
         levelMap.put(Level.INFO, LogLevel.INFO);
@@ -48,20 +48,19 @@ public class JBossLoggerAdapter extends Logger {
     @Override
     public boolean isEnabled(Level level) {
         final LogLevel internalLevel = JBOSS_TO_INTERNAL.get(level);
-        final LogRecordCollector recordCollector = LogRecordCollector.RECORD_COLLECTORS.get();
-        return recordCollector.getEnabledLevels().contains(internalLevel);
+        return LogRecordCollector.RECORD_COLLECTOR.isLevelEnabled(internalLevel);
     }
 
     @Override
     protected void doLogf(Level level, String loggerClassName, String format, Object[] parameters, Throwable thrown) {
-        final LogRecordCollector recordCollector = LogRecordCollector.RECORD_COLLECTORS.get();
+        final LogRecordCollector recordCollector = LogRecordCollector.RECORD_COLLECTOR;
         final LogLevel internalLevel = JBOSS_TO_INTERNAL.get(level);
-        if (!recordCollector.getEnabledLevels().contains(internalLevel)) {
+        if (!recordCollector.isLevelEnabled(internalLevel)) {
             return;
         }
         final String message;
         if (null == parameters) {
-            message = String.format(format);
+            message = format;
         } else {
             message = String.format(format, parameters);
         }
@@ -71,9 +70,9 @@ public class JBossLoggerAdapter extends Logger {
 
     @Override
     protected void doLog(Level level, String loggerClassName, Object msgObj, Object[] parameters, Throwable thrown) {
-        final LogRecordCollector recordCollector = LogRecordCollector.RECORD_COLLECTORS.get();
+        final LogRecordCollector recordCollector = LogRecordCollector.RECORD_COLLECTOR;
         final LogLevel internalLevel = JBOSS_TO_INTERNAL.get(level);
-        if (!recordCollector.getEnabledLevels().contains(internalLevel)) {
+        if (!recordCollector.isLevelEnabled(internalLevel)) {
             return;
         }
         final String message;

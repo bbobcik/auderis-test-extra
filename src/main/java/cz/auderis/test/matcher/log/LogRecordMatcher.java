@@ -64,35 +64,37 @@ public class LogRecordMatcher extends TypeSafeMatcher<LogRecord> {
         description.appendText("log record");
         String separator = null;
         if (null != nameMatcher) {
-            description.appendText(" with name that is ");
+            description.appendText(" with name that ");
             nameMatcher.describeTo(description);
-            separator = " and";
+            separator = " and ";
         }
         if (null != messageMatcher) {
             if (null == separator) {
-                description.appendText(" with");
-                separator = " and";
+                description.appendText(" with ");
+                separator = " and ";
             } else {
                 description.appendText(separator);
             }
-            description.appendText(" message that is ");
+            description.appendText("message that ");
             messageMatcher.describeTo(description);
         }
         if (null != levelMatcher) {
             if (null == separator) {
-                description.appendText(" with");
-                separator = " and";
+                description.appendText(" with ");
+                separator = " and ";
             } else {
                 description.appendText(separator);
             }
-            description.appendText(" level that is ");
+            description.appendText("level that ");
             levelMatcher.describeTo(description);
         }
         if (null != timestampMatcher) {
             if (null != separator) {
                 description.appendText(separator);
+            } else {
+                description.appendText(" with ");
             }
-            description.appendText(" timestamp that is ");
+            description.appendText("timestamp that ");
             timestampMatcher.describeTo(description);
         }
     }
@@ -100,34 +102,34 @@ public class LogRecordMatcher extends TypeSafeMatcher<LogRecord> {
     @Override
     protected void describeMismatchSafely(LogRecord item, Description description) {
         String separator = null;
-        if (null != nameMatcher) {
-            description.appendText("name was ");
+        if ((null != nameMatcher) && !nameMatcher.matches(item.getLoggerName())) {
+            description.appendText("name ");
             nameMatcher.describeMismatch(item.getLoggerName(), description);
-            separator = " and";
+            separator = " and ";
         }
-        if (null != messageMatcher) {
+        if ((null != messageMatcher) && !messageMatcher.matches(item.getMessage())) {
             if (null == separator) {
-                separator = " and";
+                separator = " and ";
             } else {
                 description.appendText(separator);
             }
-            description.appendText(" message was ");
+            description.appendText("message ");
             messageMatcher.describeMismatch(item.getMessage(), description);
         }
-        if (null != levelMatcher) {
+        if ((null != levelMatcher) && !levelMatcher.matches(item.getLevel())) {
             if (null == separator) {
-                separator = " and";
+                separator = " and ";
             } else {
                 description.appendText(separator);
             }
-            description.appendText(" level was ");
+            description.appendText("level ");
             levelMatcher.describeMismatch(item.getLevel(), description);
         }
-        if (null != timestampMatcher) {
+        if ((null != timestampMatcher) && !timestampMatcher.matches(item.getTimestamp())) {
             if (null != separator) {
                 description.appendText(separator);
             }
-            description.appendText(" timestamp was ");
+            description.appendText("timestamp ");
             timestampMatcher.describeMismatch(item.getTimestamp(), description);
         }
     }
@@ -160,6 +162,16 @@ public class LogRecordMatcher extends TypeSafeMatcher<LogRecord> {
     @Factory
     public static Matcher<? super LogRecord> hasMessage(String message) {
         return new LogRecordMatcher(null, null, null, is(message));
+    }
+
+    @Factory
+    public static Matcher<? super LogRecord> hasLevelAndMessage(Matcher<? super LogLevel> levelMatcher, Matcher<? super String> messageMatcher) {
+        return new LogRecordMatcher(null, levelMatcher, null, messageMatcher);
+    }
+
+    @Factory
+    public static Matcher<? super LogRecord> hasLevelAndMessage(LogLevel level, String message) {
+        return new LogRecordMatcher(null, is(level), null, is(message));
     }
 
 }

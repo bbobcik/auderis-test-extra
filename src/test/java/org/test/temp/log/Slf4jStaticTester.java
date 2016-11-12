@@ -27,11 +27,11 @@ public class Slf4jStaticTester {
     private static final Logger LOG = LoggerFactory.getLogger(Slf4jStaticTester.class);
 
     public void doWork() {
-        LOG.trace("Work 1");
-        LOG.debug("Work 2");
-        LOG.info("Work 3");
-        LOG.warn("Work 4");
-        LOG.error("Work 5");
+        LOG.trace("SLF4J : Work 1");
+        LOG.debug("SLF4J : Work 2");
+        LOG.info("SLF4J : Work 3");
+        LOG.warn("SLF4J : Work 4");
+        LOG.error("SLF4J : Work 5");
     }
 
 }

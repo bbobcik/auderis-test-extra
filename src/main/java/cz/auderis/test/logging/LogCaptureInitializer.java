@@ -14,21 +14,13 @@
  * limitations under the License.
  */
 
-package org.test.temp.log;
+package cz.auderis.test.logging;
 
-import org.jboss.logging.Logger;
+public interface LogCaptureInitializer {
 
-public class JBossStaticTester {
+    boolean isFrameworkPresent();
 
-    private static final Logger LOG = Logger.getLogger(JBossStaticTester.class);
+    void initialize() throws Exception;
 
-    public void doWork() {
-        LOG.trace("JBOSS : Work 1");
-        LOG.debug("JBOSS : Work 2");
-        LOG.info("JBOSS : Work 3");
-        LOG.warn("JBOSS : Work 4");
-        LOG.error("JBOSS : Work 5");
-        LOG.fatal("JBOSS : Work 6");
-    }
 
 }

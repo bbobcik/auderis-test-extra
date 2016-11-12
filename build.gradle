@@ -59,6 +59,7 @@ dependencies {
 	}
 	clientOptional 'org.slf4j:slf4j-api:1.7+'
 	clientOptional 'org.jboss.logging:jboss-logging:3.3.0.Final'
+	clientOptional 'log4j:log4j:1.2.17'
 	testCompile 'org.hamcrest:hamcrest-all:1.3'
 	testCompile 'cz.auderis:auderis-test-category:1.0.1'
 }

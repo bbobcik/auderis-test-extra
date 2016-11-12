@@ -19,47 +19,50 @@ package cz.auderis.test.logging;
 import cz.auderis.test.category.SanityTest;
 import cz.auderis.test.rule.LogBuffer;
 import cz.auderis.test.rule.LogFramework;
-import junitparams.JUnitParamsRunner;
 import org.junit.ClassRule;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
-import org.junit.runner.RunWith;
+import org.test.temp.log.JBossStaticTester;
+import org.test.temp.log.Log4jStaticTester;
 import org.test.temp.log.Slf4jStaticTester;
 
 import java.util.List;
 
 import static cz.auderis.test.matcher.log.LogRecordMatcher.hasLevel;
-import static cz.auderis.test.matcher.log.LogRecordMatcher.hasMessage;
+import static cz.auderis.test.matcher.log.LogRecordMatcher.hasLevelAndMessage;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.collection.IsCollectionWithSize.hasSize;
+import static org.hamcrest.Matchers.hasSize;
 
-@RunWith(JUnitParamsRunner.class)
-public class Slf4jLoggingRuleTest {
+public class MultiLoggingCaptureTest {
+
 
     @ClassRule
-    public static LogFramework logFramework = LogFramework.slf4j();
+    public static LogFramework logFramework = LogFramework.everything();
 
     @Rule
     public LogBuffer logBuffer = new LogBuffer();
 
-
     @Test
     @Category(SanityTest.class)
-    public void shouldInterceptSlf4jLogging() throws Exception {
+    public void shouldInterceptJBossLogging() throws Exception {
         // Given
         logBuffer.levels().enableOnly(LogLevel.INFO.plusHigherLevels());
-        Slf4jStaticTester tester = new Slf4jStaticTester();
+        JBossStaticTester jboss = new JBossStaticTester();
+        Log4jStaticTester log4j = new Log4jStaticTester();
+        Slf4jStaticTester slf4j = new Slf4jStaticTester();
 
         // When
-        tester.doWork();
+        jboss.doWork();
+        log4j.doWork();
+        slf4j.doWork();
 
         // Then
         final List<LogRecord> infoRecords = logBuffer.getRecords(hasLevel(LogLevel.INFO));
-        assertThat(infoRecords, hasSize(1));
-        final LogRecord logRecord = infoRecords.get(0);
-        assertThat(logRecord, hasLevel(LogLevel.INFO));
-        assertThat(logRecord, hasMessage("SLF4J : Work 3"));
+        assertThat(infoRecords, hasSize(3));
+        assertThat(infoRecords.get(0), hasLevelAndMessage(LogLevel.INFO, "JBOSS : Work 3"));
+        assertThat(infoRecords.get(1), hasLevelAndMessage(LogLevel.INFO, "LOG4J : Work 3"));
+        assertThat(infoRecords.get(2), hasLevelAndMessage(LogLevel.INFO, "SLF4J : Work 3"));
     }
 
 }
