@@ -19,7 +19,7 @@ apply plugin: 'signing'
 apply plugin: 'maven'
 
 group 'cz.auderis'
-version '1.2.2-SNAPSHOT'
+version '1.2.2'
 ext.releaseBuild = !version.endsWith('-SNAPSHOT')
 
 compileJava {
@@ -115,7 +115,7 @@ uploadArchives {
 			mavenDeployer {
 				beforeDeployment { MavenDeployment deployment -> signing.signPom(deployment) }
 
-				repository(url: "https://oss.sonatype.orgx/service/local/staging/deploy/maven2/") {
+				repository(url: "https://oss.sonatype.org/service/local/staging/deploy/maven2/") {
 					authentication(userName: LOCAL_CREDENTIALS.sonatype.userName, password: LOCAL_CREDENTIALS.sonatype.password)
 				}
 
