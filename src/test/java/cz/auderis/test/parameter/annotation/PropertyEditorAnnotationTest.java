@@ -36,7 +36,7 @@ public class PropertyEditorAnnotationTest {
             int expectedNumber,
             String expectedText
     ) throws Exception {
-        assertThat(val.getClass(), is(equalTo(ValueClass1.class)));
+        assertThat(val.getClass(), is(equalTo((Class) ValueClass1.class)));
         assertThat(val, allOf(hasProperty("numValue", is(expectedNumber)), hasProperty("textValue", is(expectedText))));
     }
 
@@ -49,7 +49,7 @@ public class PropertyEditorAnnotationTest {
             int expectedNumber,
             String expectedText
     ) throws Exception {
-        assertThat(val.getClass(), is(equalTo(ValueClass3.class)));
+        assertThat(val.getClass(), is(equalTo((Class) ValueClass3.class)));
         assertThat(val, allOf(hasProperty("numValue", is(expectedNumber)), hasProperty("textValue", is(expectedText))));
     }
 
@@ -62,7 +62,7 @@ public class PropertyEditorAnnotationTest {
             int expectedNumber,
             String expectedText
     ) throws Exception {
-        assertThat(val.getClass(), is(equalTo(ValueClass2.class)));
+        assertThat(val.getClass(), is(equalTo((Class) ValueClass2.class)));
         assertThat(val, allOf(hasProperty("numValue", is(expectedNumber)), hasProperty("textValue", is(expectedText))));
     }
 
