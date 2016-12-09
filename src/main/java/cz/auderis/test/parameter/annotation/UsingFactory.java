@@ -1,6 +1,6 @@
 package cz.auderis.test.parameter.annotation;
 
-import cz.auderis.test.parameter.annotation.impl.PropertyEditorAnnotationConverter;
+import cz.auderis.test.parameter.annotation.impl.UsingFactoryAnnotationConverter;
 import junitparams.converters.Param;
 
 import java.lang.annotation.ElementType;
@@ -10,11 +10,13 @@ import java.lang.annotation.Target;
 
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.PARAMETER)
-@Param(converter = PropertyEditorAnnotationConverter.class)
-public @interface UsingPropertyEditor {
+@Param(converter = UsingFactoryAnnotationConverter.class)
+public @interface UsingFactory {
 
-    Class<?> of() default Void.class;
+    Class<?> type();
 
-    Class<?> editor() default Void.class;
+    String method() default "valueOf";
+
+    Class<?> targetType() default Void.class;
 
 }

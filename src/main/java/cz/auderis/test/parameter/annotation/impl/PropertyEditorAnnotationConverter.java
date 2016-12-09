@@ -42,15 +42,8 @@ public class PropertyEditorAnnotationConverter implements Converter<UsingPropert
 
     @Override
     public Object convert(Object param) throws ConversionFailedException {
-        final String paramString;
-        if (null == param) {
-            paramString = null;
-        } else if (param instanceof String) {
-            paramString = (String) param;
-        } else {
-            paramString = param.toString();
-        }
         try {
+            final String paramString = asString(param);
             editor.setAsText(paramString);
             final Object result = editor.getValue();
             return result;
@@ -63,11 +56,22 @@ public class PropertyEditorAnnotationConverter implements Converter<UsingPropert
         }
     }
 
-    private static Class<?> optionalClass(Class<?> cls) {
+    static Class<?> optionalClass(Class<?> cls) {
         if ((null == cls) || (cls == Void.class)) {
             return null;
         }
         return cls;
     }
 
+    static String asString(Object param) {
+        final String paramString;
+        if (null == param) {
+            paramString = null;
+        } else if (param instanceof String) {
+            paramString = (String) param;
+        } else {
+            paramString = param.toString();
+        }
+        return paramString;
+    }
 }

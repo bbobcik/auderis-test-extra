@@ -10,6 +10,8 @@ Useful additions to JUnit/Hamcrest testing environment.
 * Support for JUnitParams "metaconversion"
   * Annotation `@UsingPropertyEditor` will delegate parameter conversion to an appropriate
     JavaBeans `PropertyEditor` implementation
+  * A factory method can be used for String-to-Target conversion using annotation
+    `@UsingFactory`
 
 ### 1.2.2
 
