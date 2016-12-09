@@ -6,6 +6,11 @@ Useful additions to JUnit/Hamcrest testing environment.
 
 ## Changelog
 
+### 1.2.3
+* Support for JUnitParams "metaconversion"
+  * Annotation `@UsingPropertyEditor` will delegate parameter conversion to an appropriate
+    JavaBeans `PropertyEditor` implementation
+
 ### 1.2.2
 
 * Build platform switched from Maven to Gradle

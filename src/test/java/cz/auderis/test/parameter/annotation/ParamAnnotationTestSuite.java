@@ -22,7 +22,8 @@ import org.junit.runners.Suite;
 @RunWith(Suite.class)
 @Suite.SuiteClasses({
     HexDataTest.class,
-    XmlTextTest.class
+    XmlTextTest.class,
+    PropertyEditorAnnotationTest.class
 })
 public class ParamAnnotationTestSuite {
 
