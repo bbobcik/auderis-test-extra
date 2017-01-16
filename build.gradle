@@ -14,13 +14,25 @@
  * limitations under the License.
  */
 
+buildscript {
+	repositories {
+		mavenLocal()
+		mavenCentral()
+	}
+
+	dependencies {
+		classpath 'cz.auderis:auderis-gradle-tools:1.0.1'
+	}
+}
+
+import cz.auderis.tools.gradle.SemanticVersion
+
 apply plugin: 'java'
 apply plugin: 'signing'
 apply plugin: 'maven'
 
 group 'cz.auderis'
-version '1.2.3'
-ext.releaseBuild = !version.endsWith('-SNAPSHOT')
+version SemanticVersion.from('VERSION')
 
 compileJava {
 	sourceCompatibility = '1.7'
@@ -82,7 +94,7 @@ artifacts {
 	archives sourcesJar
 }
 
-if (releaseBuild) {
+if (version.stable) {
 	if (!LOCAL_CREDENTIALS.sonatype) {
 		throw new InvalidUserDataException("Sonatype credentials not defined (check LOCAL_CREDENTIALS.sonatype definition)")
 		/**
@@ -111,7 +123,7 @@ if (releaseBuild) {
 
 uploadArchives {
 	repositories {
-		if (releaseBuild) {
+		if (version.stable) {
 			mavenDeployer {
 				beforeDeployment { MavenDeployment deployment -> signing.signPom(deployment) }
 
