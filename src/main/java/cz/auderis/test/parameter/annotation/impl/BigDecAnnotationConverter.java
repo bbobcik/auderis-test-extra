@@ -24,9 +24,11 @@ import java.math.BigDecimal;
 
 public class BigDecAnnotationConverter implements Converter<BigDec, BigDecimal> {
 
+    private String nullToken;
+
     @Override
     public void initialize(BigDec annotation) {
-        // No initialization needed
+        nullToken = annotation.nullToken();
     }
 
     @Override
@@ -35,6 +37,9 @@ public class BigDecAnnotationConverter implements Converter<BigDec, BigDecimal> 
             return (BigDecimal) param;
         }
         final String textParam = param.toString();
+        if ((null != nullToken) && nullToken.equals(textParam)) {
+            return null;
+        }
         try {
             final BigDecimal result = new BigDecimal(textParam);
             return result;

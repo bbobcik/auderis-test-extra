@@ -24,9 +24,11 @@ import java.math.BigInteger;
 
 public class BigIntAnnotationConverter implements Converter<BigDec, BigInteger> {
 
+    private String nullToken;
+
     @Override
     public void initialize(BigDec annotation) {
-        // No initialization needed
+        nullToken = annotation.nullToken();
     }
 
     @Override
@@ -35,6 +37,9 @@ public class BigIntAnnotationConverter implements Converter<BigDec, BigInteger> 
             return (BigInteger) param;
         }
         final String textParam = param.toString();
+        if ((null != nullToken) && nullToken.equals(textParam)) {
+            return null;
+        }
         try {
             final BigInteger result = new BigInteger(textParam);
             return result;

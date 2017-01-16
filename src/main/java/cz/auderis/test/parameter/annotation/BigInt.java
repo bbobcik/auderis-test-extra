@@ -28,4 +28,7 @@ import java.lang.annotation.Target;
 @Target(ElementType.PARAMETER)
 @Param(converter = BigIntAnnotationConverter.class)
 public @interface BigInt {
+
+    String nullToken() default "null";
+
 }

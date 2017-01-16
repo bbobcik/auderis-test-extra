@@ -29,6 +29,6 @@ import java.lang.annotation.Target;
 @Param(converter = BigDecAnnotationConverter.class)
 public @interface BigDec {
 
-    // Marking annotation
+    String nullToken() default "null";
 
 }
