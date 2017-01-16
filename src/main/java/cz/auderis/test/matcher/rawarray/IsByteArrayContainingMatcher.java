@@ -27,7 +27,13 @@ public class IsByteArrayContainingMatcher extends TypeSafeMatcher<byte[]> {
 
     public IsByteArrayContainingMatcher(byte[] expectedData) {
         super(byte[].class);
-        this.expectedData = expectedData;
+        if (null == expectedData) {
+            throw new NullPointerException();
+        } else if (0 == expectedData.length) {
+            this.expectedData = expectedData;
+        } else {
+            this.expectedData = Arrays.copyOf(expectedData, expectedData.length);
+        }
     }
 
     public IsByteArrayContainingMatcher(int... intValues) {
@@ -45,12 +51,13 @@ public class IsByteArrayContainingMatcher extends TypeSafeMatcher<byte[]> {
 
     @Override
     public void describeTo(Description description) {
-        description.appendText("byte array of size " + expectedData.length);
         if (0 == expectedData.length) {
-            return;
+            description.appendText("empty byte array");
+        } else {
+            description.appendText("byte array of size " + expectedData.length);
+            description.appendText(" containing ");
+            description.appendText(formatByteArray(expectedData, null).toString());
         }
-        description.appendText(" containing ");
-        description.appendText(formatByteArray(expectedData).toString());
     }
 
     @Override
@@ -59,23 +66,29 @@ public class IsByteArrayContainingMatcher extends TypeSafeMatcher<byte[]> {
         if (size != expectedData.length) {
             out.appendText("data size was " + size);
         } else {
-            out.appendText("was ").appendText(formatByteArray(bytes).toString());
+            out.appendText("was ").appendText(formatByteArray(bytes, expectedData).toString());
         }
     }
 
-    static StringBuilder formatByteArray(byte[] data) {
-        final StringBuilder str = new StringBuilder(3 * data.length + 1);
+    static StringBuilder formatByteArray(byte[] data, byte[] reference) {
+        if ((null != reference) && (reference.length != data.length)) {
+            reference = null;
+        }
+        final StringBuilder str = new StringBuilder(4 * data.length + 1);
         str.append('<');
         char separator = 0;
-        for (final byte x : data) {
+        for (int i=0; i<data.length; ++i) {
             if (0 == separator) {
-                separator = ':';
+                separator = ' ';
             } else {
                 str.append(separator);
             }
-            final int byteValue = 0xFF & x;
-            str.append(Character.forDigit(byteValue >>> 4, 16));
-            str.append(Character.forDigit(byteValue & 0x0F, 16));
+            if ((null != reference) && (data[i] != reference[i])) {
+                str.append('*');
+            }
+            final int byteValue = 0xFF & data[i];
+            str.append(Character.toUpperCase(Character.forDigit(byteValue >>> 4, 16)));
+            str.append(Character.toUpperCase(Character.forDigit(byteValue & 0x0F, 16)));
         }
         str.append('>');
         return str;

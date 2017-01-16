@@ -28,4 +28,7 @@ import java.lang.annotation.Target;
 @Target(ElementType.PARAMETER)
 @Param(converter = HexArrayAnnotationConverter.class)
 public @interface HexArray {
+
+    int size() default -1;
+
 }

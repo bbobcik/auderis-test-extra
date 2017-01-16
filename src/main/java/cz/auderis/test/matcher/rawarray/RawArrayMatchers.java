@@ -19,6 +19,8 @@ package cz.auderis.test.matcher.rawarray;
 import org.hamcrest.Factory;
 import org.hamcrest.Matcher;
 
+import java.nio.ByteBuffer;
+
 public final class RawArrayMatchers {
 
     @Factory
@@ -29,6 +31,21 @@ public final class RawArrayMatchers {
     @Factory
     public static <T> Matcher<byte[]>  byteArrayContaining(int... byteValues) {
         return new IsByteArrayContainingMatcher(byteValues);
+    }
+
+    @Factory
+    public static <T> Matcher<ByteBuffer> containsBytes(byte[] bytes) {
+        return new IsByteBufferContainingMatcher(bytes);
+    }
+
+    @Factory
+    public static <T> Matcher<ByteBuffer> containsBytes(int... byteValues) {
+        return new IsByteBufferContainingMatcher(byteValues);
+    }
+
+    @Factory
+    public static <T> Matcher<ByteBuffer> hasSameContentsAs(ByteBuffer reference) {
+        return new IsByteBufferContainingMatcher(reference);
     }
 
     private RawArrayMatchers() {

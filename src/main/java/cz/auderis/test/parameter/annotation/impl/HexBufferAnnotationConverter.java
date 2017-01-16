@@ -25,16 +25,44 @@ import java.nio.ByteBuffer;
 public class HexBufferAnnotationConverter implements Converter<HexBuffer, ByteBuffer> {
 
     private boolean useDirectBuffer;
+    private boolean skipRewind;
+    private int capacity;
 
     @Override
     public void initialize(HexBuffer annotation) {
         useDirectBuffer = annotation.direct();
+        skipRewind = !annotation.rewind();
+        capacity = annotation.capacity();
     }
 
     @Override
     public ByteBuffer convert(Object param) throws ConversionFailedException {
         final HexChunkParser parser = new HexChunkParser(useDirectBuffer);
-        return parser.parseBuffer(param);
+        final ByteBuffer baseBuffer = parser.parseBuffer(param);
+        final ByteBuffer result;
+        if ((capacity <= 0) || (capacity == baseBuffer.capacity())) {
+            result = baseBuffer;
+            if (skipRewind) {
+                result.position(result.limit());
+            }
+        } else if (capacity < baseBuffer.capacity()) {
+            baseBuffer.limit(capacity);
+            result = baseBuffer.slice();
+            if (skipRewind) {
+                result.position(result.limit());
+            }
+        } else {
+            if (useDirectBuffer) {
+                result = ByteBuffer.allocateDirect(capacity);
+            } else {
+                result = ByteBuffer.allocate(capacity);
+            }
+            result.put(baseBuffer);
+            if (!skipRewind) {
+                result.rewind();
+            }
+        }
+        return result;
     }
 
 }

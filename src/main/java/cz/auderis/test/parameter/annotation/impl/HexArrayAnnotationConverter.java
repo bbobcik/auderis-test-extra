@@ -20,17 +20,28 @@ import cz.auderis.test.parameter.annotation.HexArray;
 import junitparams.converters.ConversionFailedException;
 import junitparams.converters.Converter;
 
+import java.util.Arrays;
+
 public class HexArrayAnnotationConverter implements Converter<HexArray, byte[]> {
+
+    private int size;
 
     @Override
     public void initialize(HexArray annotation) {
-        // no initialization needed
+        size = annotation.size();
     }
 
     @Override
     public byte[] convert(Object param) throws ConversionFailedException {
         final HexChunkParser parser = new HexChunkParser();
-        return parser.parseByteArray(param);
+        final byte[] baseArray = parser.parseByteArray(param);
+        final byte[] result;
+        if ((size <= 0) || (size == baseArray.length)) {
+            result = baseArray;
+        } else {
+            result = Arrays.copyOf(baseArray, size);
+        }
+        return result;
     }
 
 }

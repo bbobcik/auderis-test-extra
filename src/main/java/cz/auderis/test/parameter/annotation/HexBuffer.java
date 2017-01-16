@@ -31,4 +31,8 @@ public @interface HexBuffer {
 
     boolean direct() default false;
 
+    int capacity() default -1;
+
+    boolean rewind() default true;
+
 }

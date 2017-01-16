@@ -23,7 +23,11 @@ import java.util.regex.Pattern;
 final class HexChunkParser {
 
     private static final byte[] EMPTY_ARRAY = new byte[0];
-    private static final Pattern HEX_CHUNK_PATTERN = Pattern.compile("(?:0x([0-9A-F]++))|([0-9A-F]{2,}+|[1-9A-F]|0(?!x))(?:H)?", Pattern.CASE_INSENSITIVE);
+    private static final Pattern HEX_CHUNK_PATTERN = Pattern.compile(
+            "(?:\\{.*?\\}\\s*+)?+"                                            // Optional comment in braces
+            + "(?:(?:0x([0-9A-F]++))|([0-9A-F]{2,}+|[1-9A-F]|0(?!x))(?:H)?)", // Main chunk of hexadecimal digits
+            Pattern.CASE_INSENSITIVE
+    );
 
     private final Matcher hexChunkMatcher;
     private final boolean useDirectBuffer;

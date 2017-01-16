@@ -26,6 +26,7 @@ import org.junit.runner.RunWith;
 import java.nio.ByteBuffer;
 
 import static cz.auderis.test.matcher.rawarray.RawArrayMatchers.byteArrayContaining;
+import static cz.auderis.test.matcher.rawarray.RawArrayMatchers.hasSameContentsAs;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 
@@ -41,6 +42,7 @@ public class HexDataTest {
             "ca-fe-ba-be          | CA FE BA BE",
             "0b:ad:be:ef          | 0B AD BE EF",
             "... 123 ...          | 01 23",
+            "{ first part 03 } 12:34:56 { second part 99 88 } FE:DC:BA | 12 34 56 FE DC BA",
     })
     public void shouldConvertTextToByteArray(String byteDef, @HexArray byte[] expectedBytes) throws Exception {
         // Given
@@ -55,6 +57,21 @@ public class HexDataTest {
 
     @Test
     @Parameters({
+            "123 4567 89ABC       | 01 23 45 67",
+            "0x123 0x4567 0x89ABC | 01 23 45 67",
+            "123h 4567h 89ABCh    | 01 23 45 67",
+            "0x0000 0xFFFF 0x0000 | 00 00 FF FF",
+            "ca-fe-ba-be          | CA FE BA BE",
+            "0b:ad:be             | 0B AD BE 00",
+            "... 123 ...          | 01 23 00 00",
+            "{ first part 03 } 12:34:56 { second part 99 88 } FE:DC:BA | 12 34 56 FE",
+    })
+    public void shouldConvertTextToByteArrayWithFixedSize(@HexArray(size = 4) byte[] bytes, @HexArray byte[] expectedBytes) throws Exception {
+        assertThat(bytes, is(byteArrayContaining(expectedBytes)));
+    }
+
+    @Test
+    @Parameters({
             "123 4567 89ABC       | 01 23 45 67 08 9A BC",
             "0x123 0x4567 0x89ABC | 01 23 45 67 08 9A BC",
             "123h 4567h 89ABCh    | 01 23 45 67 08 9A BC",
@@ -62,6 +79,7 @@ public class HexDataTest {
             "ca-fe-ba-be          | CA FE BA BE",
             "0b:ad:be:ef          | 0B AD BE EF",
             "... 123 ...          | 01 23",
+            "{ first part 03 } 12:34:56 { second part 99 88 } FE:DC:BA | 12 34 56 FE DC BA",
     })
     public void shouldConvertTextToBuffer(String byteDef, @HexBuffer ByteBuffer expectedBuffer) throws Exception {
         // Given
@@ -71,7 +89,22 @@ public class HexDataTest {
         final ByteBuffer buffer = converter.convert(byteDef);
 
         // Then
-        assertThat(buffer, is(expectedBuffer));
+        assertThat(buffer, hasSameContentsAs(expectedBuffer));
+    }
+
+    @Test
+    @Parameters({
+            "123 4567 89ABC       | 01 23 45 67",
+            "0x123 0x4567 0x89ABC | 01 23 45 67",
+            "123h 4567h 89ABCh    | 01 23 45 67",
+            "0x0000 0xFFFF 0x0000 | 00 00 FF FF",
+            "ca-fe-ba-be          | CA FE BA BE",
+            "0b:ad:be             | 0B AD BE 00",
+            "... 123 ...          | 01 23 00 00",
+            "{ first part 03 } 12:34:56 { second part 99 88 } FE:DC:BA | 12 34 56 FE",
+    })
+    public void shouldConvertTextToBufferWithFixedCapacity(@HexBuffer(capacity = 4) ByteBuffer buffer, @HexBuffer ByteBuffer expectedBuffer) throws Exception {
+        assertThat(buffer, hasSameContentsAs(expectedBuffer));
     }
 
 }
