@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Boleslav Bobcik - Auderis
+ * Copyright 2015-2016 Boleslav Bobcik - Auderis
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,26 +13,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package cz.auderis.test.support;
 
-package cz.auderis.test;
-
-import cz.auderis.test.logging.LoggingTestSuite;
-import cz.auderis.test.matcher.MatcherTestSuite;
-import cz.auderis.test.parameter.annotation.ParamAnnotationTestSuite;
-import cz.auderis.test.rule.RuleTestSuite;
-import cz.auderis.test.support.SupportSuite;
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
 
 @RunWith(Suite.class)
 @Suite.SuiteClasses({
-        LoggingTestSuite.class,
-        MatcherTestSuite.class,
-        ParamAnnotationTestSuite.class,
-        RuleTestSuite.class,
-        SupportSuite.class
+        NaturalDescriptionJoinerTest.class
 })
-public class CompleteTestSuite {
+public class SupportSuite {
 
     // Only a suite definition
 
