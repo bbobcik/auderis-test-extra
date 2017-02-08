@@ -6,6 +6,8 @@ Useful additions to JUnit/Hamcrest testing environment.
 
 ## Changelog
 
+### 1.2.5
+
 ### 1.2.4
 * Parameter annotation `@HexBuffer` can optionally specify desired buffer capacity as well as whether
   to skip the rewinding of the produced `ByteBuffer`
