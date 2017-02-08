@@ -180,7 +180,7 @@ uploadArchives {
 }
 
 uploadArchives.doFirst {
-	if (releaseBuild) {
+	if (version.stable) {
 		logger.lifecycle("Release build - uploading artifacts to OSS Sonatype Nexus")
 	} else {
 		logger.lifecycle("Non-release build - uploading artifacts to Maven Local")

@@ -6,6 +6,17 @@ Useful additions to JUnit/Hamcrest testing environment.
 
 ## Changelog
 
+### 1.2.4
+* Parameter annotation `@HexBuffer` can optionally specify desired buffer capacity as well as whether
+  to skip the rewinding of the produced `ByteBuffer`
+* Parameter annotation `@HexArray` can optionally specify desired size of produced byte array
+* New matchers targetting `ByteBuffer`s were added
+* Parameter annotations `@BigDec` and `@BigInt` can produce `null` values from the text source,
+  using appropriate annotation argument 
+* `ByteSequenceFormatSupport` allows to format byte sequences into a readable form, typically
+  into hexadecimal chunks
+* Added utility class `NaturalDescriptionJoiner` that facilitates construction of natural language item lists 
+
 ### 1.2.3
 * Support for JUnitParams "metaconversion"
   * Annotation `@UsingPropertyEditor` will delegate parameter conversion to an appropriate
@@ -14,7 +25,6 @@ Useful additions to JUnit/Hamcrest testing environment.
     `@UsingFactory`
 
 ### 1.2.2
-
 * Build platform switched from Maven to Gradle
 * Logging output testing extended
   * Added support for [Log4J 1.2.x](http://logging.apache.org/log4j/1.2)
