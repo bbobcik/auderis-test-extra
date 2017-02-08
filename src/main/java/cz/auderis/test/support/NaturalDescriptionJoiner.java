@@ -16,7 +16,9 @@
 package cz.auderis.test.support;
 
 import org.hamcrest.Description;
+import org.hamcrest.Matcher;
 import org.hamcrest.SelfDescribing;
+import org.hamcrest.StringDescription;
 
 import java.util.Deque;
 import java.util.LinkedList;
@@ -109,7 +111,7 @@ public class NaturalDescriptionJoiner implements SelfDescribing {
 
     public NaturalDescriptionJoiner add(Object valuePrefix, Object value, Object valueSuffix) {
         if (null != value) {
-            final DescriptionItem item = new DescriptionItem(valuePrefix, value, valueSuffix);
+            final DescriptionItem item = new DescriptionItem(valuePrefix, value, valueSuffix, null);
             items.add(item);
         }
         return this;
@@ -121,6 +123,22 @@ public class NaturalDescriptionJoiner implements SelfDescribing {
 
     public void add(Object value) {
         add(null, value, null);
+    }
+
+    public <T> NaturalDescriptionJoiner addMismatch(Object valuePrefix, Matcher<? super T> valueMatcher, T value, Object valueSuffix) {
+        if ((null != valueMatcher) && !valueMatcher.matches(value)) {
+            final DescriptionItem item = new DescriptionItem(valuePrefix, value, valueSuffix, valueMatcher);
+            items.add(item);
+        }
+        return this;
+    }
+
+    public <T> void addMismatch(Object valuePrefix, Matcher<? super T> valueMatcher, T value) {
+        addMismatch(valuePrefix, valueMatcher, value, null);
+    }
+
+    public <T> void addMismatch(Matcher<? super T> valueMatcher, T value) {
+        addMismatch(null, valueMatcher, value, null);
     }
 
     @Override
@@ -135,7 +153,11 @@ public class NaturalDescriptionJoiner implements SelfDescribing {
         int idx = itemCount - 1;
         for (DescriptionItem item : items) {
             appendToDescription(desc, item.valuePrefix);
-            appendToDescription(desc, item.value);
+            if (null != item.matcher) {
+                item.matcher.describeMismatch(item.value, desc);
+            } else {
+                appendToDescription(desc, item.value);
+            }
             appendToDescription(desc, item.valueSuffix);
             if (1 == idx) {
                 appendToDescription(desc, lastSeparator);
@@ -151,28 +173,8 @@ public class NaturalDescriptionJoiner implements SelfDescribing {
 
 
     public void appendTo(StringBuilder sb) {
-        final int itemCount = items.size();
-        if ((null == sb) || ((0 == itemCount) && !usePrefixWhenEmpty && !useSuffixWhenEmpty)) {
-            return;
-        }
-        if ((0 != itemCount) || usePrefixWhenEmpty) {
-            appendToStrBuilder(sb, prefix);
-        }
-        int idx = itemCount - 1;
-        for (DescriptionItem item : items) {
-            appendToStrBuilder(sb, item.valuePrefix);
-            appendToStrBuilder(sb, item.value);
-            appendToStrBuilder(sb, item.valueSuffix);
-            if (1 == idx) {
-                appendToStrBuilder(sb, lastSeparator);
-            } else if (idx > 1) {
-                appendToStrBuilder(sb, normalSeparator);
-            }
-            --idx;
-        }
-        if ((0 != itemCount) || useSuffixWhenEmpty) {
-            appendToStrBuilder(sb, suffix);
-        }
+        final StringDescription desc = new StringDescription(sb);
+        describeTo(desc);
     }
 
     private static void appendToDescription(Description desc, Object obj) {
@@ -183,21 +185,17 @@ public class NaturalDescriptionJoiner implements SelfDescribing {
         }
     }
 
-    private static void appendToStrBuilder(StringBuilder sb, Object obj) {
-        if (null != obj) {
-            sb.append(obj);
-        }
-    }
-
     static final class DescriptionItem {
         final Object valuePrefix;
         final Object valueSuffix;
         final Object value;
+        final Matcher<?> matcher;
 
-        DescriptionItem(Object valuePrefix, Object value, Object valueSuffix) {
+        DescriptionItem(Object valuePrefix, Object value, Object valueSuffix, Matcher<?> matcher) {
             this.valuePrefix = valuePrefix;
             this.value = value;
             this.valueSuffix = valueSuffix;
+            this.matcher = matcher;
         }
     }
 
