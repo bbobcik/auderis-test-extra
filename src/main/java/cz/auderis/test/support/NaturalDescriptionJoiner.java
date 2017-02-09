@@ -20,8 +20,9 @@ import org.hamcrest.Matcher;
 import org.hamcrest.SelfDescribing;
 import org.hamcrest.StringDescription;
 
-import java.util.Deque;
+import java.util.Iterator;
 import java.util.LinkedList;
+import java.util.List;
 
 public class NaturalDescriptionJoiner implements SelfDescribing {
 
@@ -31,7 +32,7 @@ public class NaturalDescriptionJoiner implements SelfDescribing {
     Object lastSeparator;
     boolean usePrefixWhenEmpty;
     boolean useSuffixWhenEmpty;
-    final Deque<DescriptionItem> items;
+    final List<DescriptionItem> items;
 
     public NaturalDescriptionJoiner(Object prefix, Object normalSeparator, Object lastSeparator, Object suffix) {
         this.prefix = prefix;
@@ -109,9 +110,14 @@ public class NaturalDescriptionJoiner implements SelfDescribing {
         return this;
     }
 
+    public boolean isEmpty() {
+        compactItems();
+        return items.isEmpty();
+    }
+
     public NaturalDescriptionJoiner add(Object valuePrefix, Object value, Object valueSuffix) {
         if (null != value) {
-            final DescriptionItem item = new DescriptionItem(valuePrefix, value, valueSuffix, null);
+            final DescriptionItem item = new DescriptionItem(valuePrefix, value, valueSuffix);
             items.add(item);
         }
         return this;
@@ -127,7 +133,7 @@ public class NaturalDescriptionJoiner implements SelfDescribing {
 
     public <T> NaturalDescriptionJoiner addMismatch(Object valuePrefix, Matcher<? super T> valueMatcher, T value, Object valueSuffix) {
         if ((null != valueMatcher) && !valueMatcher.matches(value)) {
-            final DescriptionItem item = new DescriptionItem(valuePrefix, value, valueSuffix, valueMatcher);
+            final DescriptionItem item = new DescriptionItem(valuePrefix, valueMatcher, value, valueSuffix);
             items.add(item);
         }
         return this;
@@ -143,8 +149,12 @@ public class NaturalDescriptionJoiner implements SelfDescribing {
 
     @Override
     public void describeTo(Description desc) {
+        if (null == desc) {
+            return;
+        }
+        compactItems();
         final int itemCount = items.size();
-        if ((null == desc) || ((0 == itemCount) && !usePrefixWhenEmpty && !useSuffixWhenEmpty)) {
+        if (((0 == itemCount) && !usePrefixWhenEmpty && !useSuffixWhenEmpty)) {
             return;
         }
         if ((0 != itemCount) || usePrefixWhenEmpty) {
@@ -171,10 +181,21 @@ public class NaturalDescriptionJoiner implements SelfDescribing {
         }
     }
 
-
     public void appendTo(StringBuilder sb) {
+        if (null == sb) {
+            return;
+        }
         final StringDescription desc = new StringDescription(sb);
         describeTo(desc);
+    }
+
+    private void compactItems() {
+        for (final Iterator<DescriptionItem> itemIterator = items.iterator(); itemIterator.hasNext(); ) {
+            final DescriptionItem item = itemIterator.next();
+            if (item.isRedundant()) {
+                itemIterator.remove();
+            }
+        }
     }
 
     private static void appendToDescription(Description desc, Object obj) {
@@ -190,12 +211,32 @@ public class NaturalDescriptionJoiner implements SelfDescribing {
         final Object valueSuffix;
         final Object value;
         final Matcher<?> matcher;
+        final boolean usingMatcher;
 
-        DescriptionItem(Object valuePrefix, Object value, Object valueSuffix, Matcher<?> matcher) {
+        DescriptionItem(Object valuePrefix, Object value, Object valueSuffix) {
+            this.valuePrefix = valuePrefix;
+            this.value = value;
+            this.valueSuffix = valueSuffix;
+            this.matcher = null;
+            this.usingMatcher = false;
+        }
+
+        DescriptionItem(Object valuePrefix, Matcher<?> matcher, Object value, Object valueSuffix) {
             this.valuePrefix = valuePrefix;
             this.value = value;
             this.valueSuffix = valueSuffix;
             this.matcher = matcher;
+            this.usingMatcher = true;
+        }
+
+        boolean isRedundant() {
+            final boolean result;
+            if (usingMatcher) {
+                result = (null == matcher) || matcher.matches(value);
+            } else {
+                result = (null == value);
+            }
+            return result;
         }
     }
 

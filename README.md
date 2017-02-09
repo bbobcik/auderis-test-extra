@@ -7,6 +7,10 @@ Useful additions to JUnit/Hamcrest testing environment.
 ## Changelog
 
 ### 1.2.5
+* Natural list joining facility `NaturalDescriptionJoiner` has better support for
+  Hamcrest-related activities: descriptions of matchers' mismatches can be added to the
+  result list (items where the matcher is either `null` or matches the provided value are
+  omitted from the result).
 
 ### 1.2.4
 * Parameter annotation `@HexBuffer` can optionally specify desired buffer capacity as well as whether

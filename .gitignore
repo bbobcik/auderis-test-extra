@@ -5,6 +5,8 @@
 
 *.class
 target/
+/build/
+/classes/
 *.com
 *.dll
 *.exe
