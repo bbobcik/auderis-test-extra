@@ -110,8 +110,55 @@ public class NaturalDescriptionJoinerTest {
         assertThat(result, is(expectedResult));
     }
 
+    @Test
+    @Parameters({
+            "null | A+B+C+X+Y*Z",
+            "(%s) | (A)+(B)+(C)+(X)+(Y)*(Z)",
+            "%-2s.  | A .+B .+C .+X .+Y .*Z ."
+    })
+    public void shouldFormatValues(String valueFormat, String expectedResult) throws Exception {
+        // Given
+        joiner.withNormalSeparator("+");
+        joiner.withLastSeparator("*");
+        final FmtDescProvider fmt = new FmtDescProvider(nullable(valueFormat));
+
+        // When
+        joiner.add(null, "A", null, fmt);
+        joiner.add(null, "B", null, fmt);
+        joiner.add(null, "C", null, fmt);
+        joiner.add("K", null, "L", fmt);
+        joiner.add(null, "X", null, fmt);
+        joiner.add(null, "Y", null, fmt);
+        joiner.add(null, "Z", null, fmt);
+        joiner.describeTo(description);
+
+        // Then
+        final String result = description.toString();
+        assertThat(result, is(expectedResult));
+    }
+
     static String nullable(String str) {
         return "null".equals(str) ? null : str;
+    }
+
+
+
+    static final class FmtDescProvider implements DescriptionProvider<Object> {
+        final String fmt;
+
+        FmtDescProvider(String fmt) {
+            this.fmt = fmt;
+        }
+
+        @Override
+        public void describe(Object object, Description targetDescription) {
+            if (null != fmt) {
+                final String text = String.format(fmt, object);
+                targetDescription.appendText(text);
+            } else {
+                targetDescription.appendText(object.toString());
+            }
+        }
     }
 
 }

@@ -23,6 +23,7 @@ import org.hamcrest.StringDescription;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.concurrent.Callable;
 
 public class NaturalDescriptionJoiner implements SelfDescribing {
 
@@ -123,12 +124,20 @@ public class NaturalDescriptionJoiner implements SelfDescribing {
         return this;
     }
 
-    public void add(Object valuePrefix, Object value) {
-        add(valuePrefix, value, null);
+    public NaturalDescriptionJoiner add(Object valuePrefix, Object value) {
+        return add(valuePrefix, value, null);
     }
 
-    public void add(Object value) {
-        add(null, value, null);
+    public NaturalDescriptionJoiner add(Object value) {
+        return add(null, value, null);
+    }
+
+    public <T> NaturalDescriptionJoiner add(Object valuePrefix, T value, Object valueSuffix, DescriptionProvider<? super T> valueDescriber) {
+        if (null != value) {
+            final DescriptionItem item = new DescriptionItem(valuePrefix, value, valueSuffix, valueDescriber);
+            items.add(item);
+        }
+        return this;
     }
 
     public <T> NaturalDescriptionJoiner addMismatch(Object valuePrefix, Matcher<? super T> valueMatcher, T value, Object valueSuffix) {
@@ -139,12 +148,20 @@ public class NaturalDescriptionJoiner implements SelfDescribing {
         return this;
     }
 
-    public <T> void addMismatch(Object valuePrefix, Matcher<? super T> valueMatcher, T value) {
-        addMismatch(valuePrefix, valueMatcher, value, null);
+    public <T> NaturalDescriptionJoiner addMismatch(Object valuePrefix, Matcher<? super T> valueMatcher, T value) {
+        return addMismatch(valuePrefix, valueMatcher, value, null);
     }
 
-    public <T> void addMismatch(Matcher<? super T> valueMatcher, T value) {
-        addMismatch(null, valueMatcher, value, null);
+    public <T> NaturalDescriptionJoiner addMismatch(Matcher<? super T> valueMatcher, T value) {
+        return addMismatch(null, valueMatcher, value, null);
+    }
+
+    public <T> NaturalDescriptionJoiner addMismatch(Object valuePrefix, Matcher<? super T> valueMatcher, T value, Object valueSuffix, MismatchDescriptionProvider<? super T> mismatchDescriber) {
+        if ((null != valueMatcher) && !valueMatcher.matches(value)) {
+            final DescriptionItem item = new DescriptionItem(valuePrefix, valueMatcher, value, valueSuffix, mismatchDescriber);
+            items.add(item);
+        }
+        return this;
     }
 
     @Override
@@ -158,26 +175,26 @@ public class NaturalDescriptionJoiner implements SelfDescribing {
             return;
         }
         if ((0 != itemCount) || usePrefixWhenEmpty) {
-            appendToDescription(desc, prefix);
+            smartAppend(prefix, desc);
         }
         int idx = itemCount - 1;
         for (DescriptionItem item : items) {
-            appendToDescription(desc, item.valuePrefix);
+            appendItemSurroundingTextToDescription(item.matcher, item.valuePrefix, desc);
             if (null != item.matcher) {
-                item.matcher.describeMismatch(item.value, desc);
+                item.describeMismatch(desc);
             } else {
-                appendToDescription(desc, item.value);
+                item.describeValue(desc);
             }
-            appendToDescription(desc, item.valueSuffix);
+            appendItemSurroundingTextToDescription(item.matcher, item.valueSuffix, desc);
             if (1 == idx) {
-                appendToDescription(desc, lastSeparator);
+                smartAppend(lastSeparator, desc);
             } else if (idx > 1) {
-                appendToDescription(desc, normalSeparator);
+                smartAppend(normalSeparator, desc);
             }
             --idx;
         }
         if ((0 != itemCount) || useSuffixWhenEmpty) {
-            appendToDescription(desc, suffix);
+            smartAppend(suffix, desc);
         }
     }
 
@@ -198,34 +215,73 @@ public class NaturalDescriptionJoiner implements SelfDescribing {
         }
     }
 
-    private static void appendToDescription(Description desc, Object obj) {
-        if (obj instanceof SelfDescribing) {
-            ((SelfDescribing) obj).describeTo(desc);
-        } else if (null != obj) {
-            desc.appendText(obj.toString());
+    private static void appendItemSurroundingTextToDescription(Matcher<?> matcher, Object obj, Description desc) {
+        if ((null != matcher) && (obj instanceof MismatchDescriptionProvider)) {
+            ((MismatchDescriptionProvider) obj).describe(matcher, obj, desc);
+        } else if (obj instanceof DescriptionProvider) {
+            ((DescriptionProvider) obj).describe(obj, desc);
+        } else {
+            smartAppend(obj, desc);
         }
     }
+
+    private static void smartAppend(Object obj, Description desc) {
+        Object result = obj;
+        boolean reevaluate;
+        do {
+            if (result instanceof Callable) {
+                try {
+                    result = ((Callable) result).call();
+                } catch (Exception e) {
+                    throw new RuntimeException("Unable to obtain text for description", e);
+                }
+            }
+            reevaluate = !((null == result) || (result instanceof CharSequence) || (result instanceof SelfDescribing));
+        } while (reevaluate);
+        if (null == result) {
+            // Nothing appended
+        } else if (result instanceof SelfDescribing) {
+            ((SelfDescribing) result).describeTo(desc);
+        } else {
+            desc.appendText(result.toString());
+        }
+    }
+
 
     static final class DescriptionItem {
         final Object valuePrefix;
         final Object valueSuffix;
         final Object value;
-        final Matcher<?> matcher;
+        final Matcher<Object> matcher;
+        final DescriptionProvider<Object> valueDescriptionProvider;
+        final MismatchDescriptionProvider<Object> mismatchDescriptionProvider;
         final boolean usingMatcher;
 
         DescriptionItem(Object valuePrefix, Object value, Object valueSuffix) {
+            this(valuePrefix, value, valueSuffix, null);
+        }
+
+        DescriptionItem(Object valuePrefix, Object value, Object valueSuffix, DescriptionProvider descriptionProvider) {
             this.valuePrefix = valuePrefix;
             this.value = value;
             this.valueSuffix = valueSuffix;
+            this.valueDescriptionProvider = descriptionProvider;
             this.matcher = null;
+            this.mismatchDescriptionProvider = null;
             this.usingMatcher = false;
         }
 
         DescriptionItem(Object valuePrefix, Matcher<?> matcher, Object value, Object valueSuffix) {
+            this(valuePrefix, matcher, value, valueSuffix, null);
+        }
+
+        DescriptionItem(Object valuePrefix, Matcher<?> matcher, Object value, Object valueSuffix, MismatchDescriptionProvider<?> mismatchDescriptionProvider) {
             this.valuePrefix = valuePrefix;
             this.value = value;
             this.valueSuffix = valueSuffix;
-            this.matcher = matcher;
+            this.valueDescriptionProvider = null;
+            this.matcher = (Matcher<Object>) matcher;
+            this.mismatchDescriptionProvider = (MismatchDescriptionProvider<Object>) mismatchDescriptionProvider;
             this.usingMatcher = true;
         }
 
@@ -237,6 +293,26 @@ public class NaturalDescriptionJoiner implements SelfDescribing {
                 result = (null == value);
             }
             return result;
+        }
+
+        void describeValue(Description desc) {
+            if (null != valueDescriptionProvider) {
+                valueDescriptionProvider.describe(value, desc);
+            } else if (value instanceof SelfDescribing) {
+                ((SelfDescribing) value).describeTo(desc);
+            } else {
+                desc.appendText(String.valueOf(value));
+            }
+        }
+
+        void describeMismatch(Description desc) {
+            if (null != mismatchDescriptionProvider) {
+                mismatchDescriptionProvider.describe(matcher, value, desc);
+            } else if (null != matcher) {
+                matcher.describeMismatch(value, desc);
+            } else {
+                desc.appendText("N/A");
+            }
         }
     }
 
