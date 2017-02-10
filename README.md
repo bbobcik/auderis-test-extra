@@ -6,6 +6,12 @@ Useful additions to JUnit/Hamcrest testing environment.
 
 ## Changelog
 
+### 1.2.6
+* To simplify creation of dedicated multi-property matchers that tend to follow a common pattern,
+  `MultiPropertyMatcher` class was added
+* Natural list joining facility `NaturalDescriptionJoiner` added support for functional
+  description generation; in Java 8, lambda construction can be efficiently used.
+
 ### 1.2.5
 * Natural list joining facility `NaturalDescriptionJoiner` has better support for
   Hamcrest-related activities: descriptions of matchers' mismatches can be added to the

@@ -10,7 +10,8 @@ import org.junit.runners.Suite;
 @Suite.SuiteClasses({
         NumericMatchersSuite.class,
         TextMatchersSuite.class,
-        DateMatchersSuite.class
+        DateMatchersSuite.class,
+        MultiPropertyMatcherTest.class
 })
 public class MatcherTestSuite {
 
