@@ -1,4 +1,4 @@
-package cz.auderis.test.matcher;
+package cz.auderis.test.matcher.multi;
 
 /**
  * @author Boleslav Bobcik
