@@ -18,11 +18,14 @@ package cz.auderis.test.support;
 import junitparams.JUnitParamsRunner;
 import junitparams.Parameters;
 import org.hamcrest.Description;
+import org.hamcrest.Matcher;
+import org.hamcrest.SelfDescribing;
 import org.hamcrest.StringDescription;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import java.util.Arrays;
+import java.util.concurrent.Callable;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.Is.is;
@@ -70,6 +73,23 @@ public class NaturalDescriptionJoinerTest {
 
         // When
         joiner.add(nullable(prefix), nullable(value), nullable(suffix));
+        joiner.describeTo(description);
+
+        // Then
+        final String result = description.toString();
+        assertThat(result, is(expectedResult));
+    }
+
+    @Test
+    @Parameters(method = "matcherPairs")
+    public void shouldSkipItemsWithNullOrSatisfiedMatcher(Matcher<? super String> matcher1, String value1, Matcher<? super String> matcher2, String value2, String expectedResult) throws Exception {
+        // Given
+        joiner.withNormalSeparator(":");
+        joiner.withLastSeparator("..");
+
+        // When
+        joiner.addMismatch(matcher1, value1);
+        joiner.addMismatch(matcher2, value2);
         joiner.describeTo(description);
 
         // Then
@@ -137,10 +157,67 @@ public class NaturalDescriptionJoinerTest {
         assertThat(result, is(expectedResult));
     }
 
+    @Test
+    @Parameters(method = "boundaryTextGenerators")
+    public void shouldUseFunctionalPrefix(Object textSpec, String expectedText) throws Exception {
+        // Given/ When
+        joiner.withPrefix(textSpec).setUsePrefixWhenEmpty(true);
+        joiner.describeTo(description);
+
+        // Then
+        final String result = description.toString();
+        assertThat(result, is(expectedText));
+    }
+
+    @Test
+    @Parameters(method = "boundaryTextGenerators")
+    public void shouldUseFunctionalSuffix(Object textSpec, String expectedText) throws Exception {
+        // Given/ When
+        joiner.withSuffix(textSpec).setUseSuffixWhenEmpty(true);
+        joiner.describeTo(description);
+
+        // Then
+        final String result = description.toString();
+        assertThat(result, is(expectedText));
+    }
+
+
+    public Object[][] matcherPairs() {
+        return new Object[][] {
+                // matcher1, value1, matcher2, value2, expected result
+                { null,    "x",  null,    "y", ""},
+                { is("x"), "x",  is("y"), "y", ""},
+                { is("x"), "a",  is("y"), "y", "was \"a\""},
+                { is("x"), "a",  is("y"), "b", "was \"a\"..was \"b\""},
+                { is("x"), null, is("y"), "b", "was null..was \"b\""},
+                { null,    null, is("y"), "b", "was \"b\""},
+        };
+    }
+
+    public Object[][] boundaryTextGenerators() {
+        return new Object[][] {
+                // generator, expected result
+                { callable("Text"),                                       "Text" },
+                { callable(callable("InnerText")),                        "InnerText" },
+                { (SelfDescribing) desc -> desc.appendText("LambdaText"), "LambdaText" },
+                { null,                                                   "" },
+                { callable(null),                                         "" },
+                { callable(callable(null)),                               "" }
+        };
+    }
+
     static String nullable(String str) {
         return "null".equals(str) ? null : str;
     }
 
+    static Callable<Object> callable(Object result) {
+        return new Callable<Object>() {
+            @Override
+            public Object call() throws Exception {
+                return result;
+            }
+        };
+    }
 
 
     static final class FmtDescProvider implements DescriptionProvider<Object> {
