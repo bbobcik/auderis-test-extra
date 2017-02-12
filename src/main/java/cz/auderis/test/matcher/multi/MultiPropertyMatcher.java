@@ -18,6 +18,10 @@ import java.util.concurrent.Callable;
  */
 public class MultiPropertyMatcher<T> extends TypeSafeMatcher<T> {
 
+    public static <T> MultiPropertyMatcher<T> of(Class<T> targetType, String objectName) {
+        return new MultiPropertyMatcher<>(targetType, objectName);
+    }
+
     final Class<T> expectedClass;
     final List<PropMatcherEntry> entries;
     final String objectName;
