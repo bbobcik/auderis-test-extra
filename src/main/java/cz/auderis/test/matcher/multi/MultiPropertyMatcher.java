@@ -47,7 +47,8 @@ public class MultiPropertyMatcher<T> extends TypeSafeMatcher<T> {
         if ((null == propertyMatcher) || (null == propertyExtractor)) {
             lastEntry = DummyPropertyEntry.INSTANCE;
         } else {
-            final PropMatcherEntry entry = new PropMatcherEntry((Matcher<Object>) propertyMatcher, propertyExtractor, propertyName, null);
+            final Object descriptionPrefix = withSmartRightWhitespace(propertyName);
+            final PropMatcherEntry entry = new PropMatcherEntry((Matcher<Object>) propertyMatcher, propertyExtractor, descriptionPrefix, null);
             entries.add(entry);
             lastEntry = entry;
         }
@@ -156,93 +157,17 @@ public class MultiPropertyMatcher<T> extends TypeSafeMatcher<T> {
         joiner.describeTo(mismatchDescription);
     }
 
-    public interface PropertyEntry {
-        PropertyEntry withPrefix(Object prefix);
-        PropertyEntry withSuffix(Object suffix);
-        PropertyEntry withMatcherDescriber(DescriptionProvider<Matcher<?>> describer);
-        PropertyEntry withMismatchDescriber(MismatchDescriptionProvider<?> describer);
-    }
-
-    static final class PropMatcherEntry implements PropertyEntry {
-        final Matcher<Object> matcher;
-        final PropertyExtractor extractor;
-        Object descPrefix;
-        Object descSuffix;
-        DescriptionProvider<Matcher<?>> valueDescriber;
-        MismatchDescriptionProvider<Object> mismatchDescriber;
-
-        PropMatcherEntry(Matcher<Object> matcher, PropertyExtractor extractor, Object descPrefix, Object descSuffix) {
-            assert null != matcher;
-            assert null != extractor;
-            this.matcher = matcher;
-            this.extractor = extractor;
-            this.descPrefix = descPrefix;
-            this.descSuffix = descSuffix;
+    static Object withSmartRightWhitespace(Object textObj) {
+        if ((null == textObj) || !(textObj instanceof CharSequence)) {
+            return textObj;
         }
-
-        @Override
-        public PropertyEntry withPrefix(Object prefix) {
-            this.descPrefix = prefix;
-            return this;
+        final CharSequence text = (CharSequence) textObj;
+        final int length = text.length();
+        if (0 == length) {
+            return textObj;
         }
-
-        @Override
-        public PropertyEntry withSuffix(Object suffix) {
-            this.descSuffix = suffix;
-            return this;
-        }
-
-        @Override
-        public PropertyEntry withMatcherDescriber(DescriptionProvider<Matcher<?>> describer) {
-            this.valueDescriber = describer;
-            return this;
-        }
-
-        @Override
-        public PropertyEntry withMismatchDescriber(MismatchDescriptionProvider<?> describer) {
-            this.mismatchDescriber = (MismatchDescriptionProvider<Object>) describer;
-            return this;
-        }
-
-        boolean matches(Object obj) {
-            final Object property = extractor.extract(obj);
-            return matcher.matches(property);
-        }
-
-        void addToJoiner(NaturalDescriptionJoiner joiner) {
-            joiner.add(descPrefix, matcher, descSuffix, valueDescriber);
-        }
-
-        void addMismatchToJoiner(Object obj, NaturalDescriptionJoiner joiner) {
-            final Object property = extractor.extract(obj);
-            if (!matcher.matches(property)) {
-                joiner.addMismatch(descPrefix, matcher, property, descSuffix, mismatchDescriber);
-            }
-        }
-    }
-
-    enum DummyPropertyEntry implements PropertyEntry {
-        INSTANCE {
-            @Override
-            public PropertyEntry withPrefix(Object prefix) {
-                return this;
-            }
-
-            @Override
-            public PropertyEntry withSuffix(Object suffix) {
-                return this;
-            }
-
-            @Override
-            public PropertyEntry withMatcherDescriber(DescriptionProvider<Matcher<?>> describer) {
-                return this;
-            }
-
-            @Override
-            public PropertyEntry withMismatchDescriber(MismatchDescriptionProvider<?> describer) {
-                return this;
-            }
-        }
+        final char lastChar = text.charAt(length - 1);
+        return Character.isLetterOrDigit(lastChar) ? String.valueOf(text) + ' ' : textObj;
     }
 
 }

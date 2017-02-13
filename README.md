@@ -6,6 +6,9 @@ Useful additions to JUnit/Hamcrest testing environment.
 
 ## Changelog
 
+### 1.2.7
+* Functionality of `MultiPropertyMatcher` improved to simplify an instance construction
+
 ### 1.2.6
 * To simplify creation of dedicated multi-property matchers that tend to follow a common pattern,
   `MultiPropertyMatcher` class was added
