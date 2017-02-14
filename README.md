@@ -6,6 +6,11 @@ Useful additions to JUnit/Hamcrest testing environment.
 
 ## Changelog
 
+### 1.2.8
+* File handling interface `WorkFolderInterface` provided for `WorkFolder` as well as for
+  its subfolders.
+* `FileMatchers` can match file attributes, using a new matcher `FileFlagMatcher`
+
 ### 1.2.7
 * Functionality of `MultiPropertyMatcher` improved to simplify an instance construction
 
