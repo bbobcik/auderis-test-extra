@@ -21,7 +21,8 @@ import org.junit.runners.Suite;
 
 @RunWith(Suite.class)
 @Suite.SuiteClasses({
-    BasicWorkFolderTest.class
+    BasicWorkFolderTest.class,
+    WorkSubFolderTest.class
 })
 public class RuleTestSuite {
 

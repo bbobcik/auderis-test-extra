@@ -23,8 +23,11 @@ import org.junit.runners.model.Statement;
 import java.io.Closeable;
 import java.io.File;
 import java.io.FileOutputStream;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Deque;
+import java.util.LinkedList;
 
 /**
  * Extension of {@link TemporaryFolder} that has better support for initial content preparation.
@@ -41,7 +44,7 @@ import java.io.InputStream;
  *     File resWithPath = work1.newResourceCopy("target/dir/copy.bin", "testResource.bin");
  * </pre>
  */
-public class WorkFolder extends TemporaryFolder {
+public class WorkFolder extends TemporaryFolder implements WorkFolderInterface {
 
 	private Class<?> resourceSearchBaseClass;
 	private Class<?> currentTestClass;
@@ -98,6 +101,46 @@ public class WorkFolder extends TemporaryFolder {
 		};
 	}
 
+	@Override
+	public File asFile() {
+		return getRoot();
+	}
+
+	@Override
+	public String absolutePath() {
+		return getRoot().getAbsolutePath();
+	}
+
+	@Override
+	public String relativePath() {
+		return ".";
+	}
+
+	@Override
+	public WorkFolderInterface getRootFolder() {
+		return this;
+	}
+
+	@Override
+	public File newFile() throws IOException {
+		return super.newFile();
+	}
+
+	@Override
+	public File newFile(String targetPath, CharSequence initialContents) throws IOException {
+		if (null == targetPath) {
+			throw new NullPointerException();
+		}
+		final File target = prepareTargetFile(targetPath);
+		if (null != initialContents) {
+			writeContents(target, initialContents);
+		} else {
+			target.createNewFile();
+		}
+		return target;
+	}
+
+	@Override
 	public File newFile(String targetPath, InputStream initialContents) throws IOException {
 		if (null == targetPath) {
 			throw new NullPointerException();
@@ -111,6 +154,7 @@ public class WorkFolder extends TemporaryFolder {
 		return target;
 	}
 
+	@Override
 	public File newResourceCopy(String targetPath, String resourceName) throws IOException {
 		if ((null == targetPath) || (null == resourceName)) {
 			throw new NullPointerException();
@@ -119,21 +163,28 @@ public class WorkFolder extends TemporaryFolder {
 		return newFile(targetPath, resourceStream);
 	}
 
+	@Override
 	public File newResourceCopy(String resourceName) throws IOException {
-		// Get filename part from resource name
-		final int filenameStart;
-		if (-1 != resourceName.indexOf('/')) {
-			filenameStart = 1 + resourceName.lastIndexOf('/');
-		} else if (('/' != File.separatorChar) && (-1 != resourceName.indexOf(File.separatorChar))) {
-			filenameStart = 1 + resourceName.lastIndexOf(File.separatorChar);
-		} else {
-			filenameStart = 0;
-		}
-		if (filenameStart >= resourceName.length()) {
-			throw new IllegalArgumentException("Cannot find filename part in resource name: " + resourceName);
-		}
-		final String fileName = resourceName.substring(filenameStart);
+		final String fileName = stripPath(resourceName);
 		return newResourceCopy(fileName, resourceName);
+	}
+
+	@Override
+	public WorkFolderInterface subfolder(String... pathComponents) throws IOException {
+		if (0 == pathComponents.length) {
+			throw new IllegalArgumentException("no path components given");
+		}
+		int relativePathLength = computeRelativePathLength(pathComponents);
+		final StringBuilder relativePathBuilder = new StringBuilder(relativePathLength);
+		File dir = getRoot();
+		prepareSubdirs(pathComponents, dir, relativePathBuilder);
+		final WorkSubFolder folder = new WorkSubFolder(this, relativePathBuilder.toString());
+		return folder;
+	}
+
+	@Override
+	public void clean() throws IOException {
+		recursiveDelete(getRoot());
 	}
 
 	private File prepareTargetFile(String targetPath) {
@@ -146,7 +197,64 @@ public class WorkFolder extends TemporaryFolder {
 		return target;
 	}
 
-	private void copyContents(File target, InputStream initialContents) throws IOException {
+	private InputStream openResource(String resourceName) throws IOException {
+		final Class<?> searchBase = (null != resourceSearchBaseClass) ? resourceSearchBaseClass : currentTestClass;
+		return searchBase.getResourceAsStream(resourceName);
+	}
+
+	Class<?> getResourceSearchBaseClass() {
+		return (null != resourceSearchBaseClass) ? resourceSearchBaseClass : currentTestClass;
+	}
+
+	static int computeRelativePathLength(String[] pathComponents) {
+		int relativePathLength = 0;
+		for (String component : pathComponents) {
+			if (null == component) {
+				throw new IllegalArgumentException("path component is null");
+			} else if (component.isEmpty()) {
+				throw new IllegalArgumentException("path component is empty");
+			}
+			relativePathLength = relativePathLength + component.length() + 1;
+		}
+		return relativePathLength;
+	}
+
+	static void prepareSubdirs(String[] pathComponents, File baseDir, StringBuilder pathBuilder) {
+		File dir = baseDir;
+		char sep = 0;
+		for (String component : pathComponents) {
+			if (0 == sep) {
+				sep = '/';
+			} else {
+				pathBuilder.append(sep);
+			}
+			pathBuilder.append(component);
+			dir = new File(dir, component);
+			if (!dir.exists()) {
+				dir.mkdirs();
+			}
+		}
+	}
+
+	static String stripPath(String resourceName) {
+		// Get filename part from resource name
+		int filenameStart = 0;
+		final int lastSeparator = resourceName.lastIndexOf('/');
+		if (-1 != lastSeparator) {
+			filenameStart = 1 + lastSeparator;
+		} else if ('/' != File.separatorChar) {
+			final int lastAltSeparator = resourceName.lastIndexOf(File.separatorChar);
+			if (-1 != lastAltSeparator) {
+				filenameStart = 1 + lastAltSeparator;
+			}
+		}
+		if (filenameStart >= resourceName.length()) {
+			throw new IllegalArgumentException("Cannot find filename part in resource name: " + resourceName);
+		}
+		return (0 != filenameStart) ? resourceName.substring(filenameStart) : resourceName;
+	}
+
+	static void copyContents(File target, InputStream initialContents) throws IOException {
 		final FileOutputStream targetStream = new FileOutputStream(target, false);
 		try {
 			final byte[] buffer = new byte[8192];
@@ -160,7 +268,16 @@ public class WorkFolder extends TemporaryFolder {
 		}
 	}
 
-	private void silentClose(Closeable stream) {
+	static void writeContents(File target, CharSequence initialContents) throws IOException {
+		final FileWriter writer = new FileWriter(target, false);
+		try {
+			writer.append(initialContents);
+		} finally {
+			silentClose(writer);
+		}
+	}
+
+	static void silentClose(Closeable stream) {
 		if (null != stream) {
 			try {
 				stream.close();
@@ -170,9 +287,41 @@ public class WorkFolder extends TemporaryFolder {
 		}
 	}
 
-	private InputStream openResource(String resourceName) throws IOException {
-		final Class<?> searchBase = (null != resourceSearchBaseClass) ? resourceSearchBaseClass : currentTestClass;
-		return searchBase.getResourceAsStream(resourceName);
+	static void recursiveDelete(File dir) {
+		final Deque<File> subdirs = new LinkedList<>();
+		final Deque<File> deletePending = new LinkedList<>();
+		final boolean targetClear = deleteDirectoryFiles(dir, subdirs);
+		if (!targetClear) {
+			while (!subdirs.isEmpty()) {
+				final File targetDir = subdirs.pop();
+				final boolean dirClean = deleteDirectoryFiles(targetDir, subdirs);
+				if (dirClean) {
+					targetDir.delete();
+				} else {
+					deletePending.add(targetDir);
+				}
+			}
+			for (File dirToDelete : deletePending) {
+				dirToDelete.delete();
+			}
+		}
+	}
+
+	private static boolean deleteDirectoryFiles(File dir, Deque<File> subdirStore) {
+		final File[] files = dir.listFiles();
+		if ((null == files) || (0 == files.length)) {
+			return true;
+		}
+		boolean noDirsFound = true;
+		for (File file : files) {
+			if (file.isDirectory()) {
+				noDirsFound = false;
+				subdirStore.addFirst(file);
+			} else {
+				file.delete();
+			}
+		}
+		return noDirsFound;
 	}
 
 }
