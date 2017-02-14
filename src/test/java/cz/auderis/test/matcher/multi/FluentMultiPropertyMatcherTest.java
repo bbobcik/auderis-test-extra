@@ -64,7 +64,7 @@ public class FluentMultiPropertyMatcherTest {
 
         // Then
         assertThat(testedObject, matchesRules);
-        assertThat(badObject, (matchesRules));
+        assertThat(badObject, not(matchesRules));
     }
 
 }
