@@ -6,6 +6,9 @@ Useful additions to JUnit/Hamcrest testing environment.
 
 ## Changelog
 
+### 1.2.9
+* (Bug) Incorrect handling of parameter annotation `@BigInt` fixed 
+
 ### 1.2.8
 * File handling interface `WorkFolderInterface` provided for `WorkFolder` as well as for
   its subfolders.

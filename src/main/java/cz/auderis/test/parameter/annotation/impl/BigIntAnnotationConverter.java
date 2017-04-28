@@ -16,18 +16,18 @@
 
 package cz.auderis.test.parameter.annotation.impl;
 
-import cz.auderis.test.parameter.annotation.BigDec;
+import cz.auderis.test.parameter.annotation.BigInt;
 import junitparams.converters.ConversionFailedException;
 import junitparams.converters.Converter;
 
 import java.math.BigInteger;
 
-public class BigIntAnnotationConverter implements Converter<BigDec, BigInteger> {
+public class BigIntAnnotationConverter implements Converter<BigInt, BigInteger> {
 
     private String nullToken;
 
     @Override
-    public void initialize(BigDec annotation) {
+    public void initialize(BigInt annotation) {
         nullToken = annotation.nullToken();
     }
 
