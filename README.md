@@ -6,6 +6,9 @@ Useful additions to JUnit/Hamcrest testing environment.
 
 ## Changelog
 
+### 1.3.0
+* `ArrayPartMatcher` implemented
+
 ### 1.2.9
 * (Bug) Incorrect handling of parameter annotation `@BigInt` fixed 
 
