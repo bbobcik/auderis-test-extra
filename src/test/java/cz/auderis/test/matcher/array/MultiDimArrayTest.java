@@ -75,8 +75,8 @@ public class MultiDimArrayTest {
     @Test
     @Parameters({
             "2x2x2 : T True F False Yes No Y N  | 2 * 2 * 2",
-            "3     : Y Y N            | 3",
-            "4x0   :                  | 4 X 0"
+            "3     : Y Y N                      | 3",
+            "4x0   :                            | 4 X 0"
     })
     public void shouldValidateBoxedBooleanArrayDimensions(@MultiArray(Boolean.class) Object multiArray, String expectedDimension) throws Exception {
         assertThat(multiArray, is(arrayWithDimensions(expectedDimension)));
@@ -85,8 +85,8 @@ public class MultiDimArrayTest {
     @Test
     @Parameters({
             "2x1x2 : -5.009 -6.999 7.432 8.977131 | 2 * 1 * 2",
-            "3 : 9 8 7                   | 3",
-            "4x0 :                       | 4 X 0"
+            "3 : 9 8 7                            | 3",
+            "4x0 :                                | 4 X 0"
     })
     public void shouldValidatePrimitiveDoubleArrayDimensions(@MultiArray(double.class) Object multiArray, String expectedDimension) throws Exception {
         assertThat(multiArray, is(arrayWithDimensions(expectedDimension)));
@@ -95,8 +95,8 @@ public class MultiDimArrayTest {
     @Test
     @Parameters({
             "2x1x2 : -5.009 -6.999 7.432 8.977131 | 2 * 1 * 2",
-            "3 : 9 8 7                   | 3",
-            "4x0 :                       | 4 X 0"
+            "3 : 9 8 7                            | 3",
+            "4x0 :                                | 4 X 0"
     })
     public void shouldValidateBoxedDoubleArrayDimensions(@MultiArray(Double.class) Object multiArray, String expectedDimension) throws Exception {
         assertThat(multiArray, is(arrayWithDimensions(expectedDimension)));
@@ -105,8 +105,8 @@ public class MultiDimArrayTest {
     @Test
     @Parameters({
             "2x1x2 : -5.009 -6.999 7.432 8.977131 | 2 * 1 * 2",
-            "3 : 9 8 7                   | 3",
-            "4x0 :                       | 4 X 0"
+            "3 : 9 8 7                            | 3",
+            "4x0 :                                | 4 X 0"
     })
     public void shouldValidateBigDecimalArrayDimensions(@MultiArray(BigDecimal.class) Object multiArray, String expectedDimension) throws Exception {
         assertThat(multiArray, is(arrayWithDimensions(expectedDimension)));
