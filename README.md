@@ -2,6 +2,7 @@
 
 Useful additions to JUnit/Hamcrest testing environment.
 
+[![Build Status](https://travis-ci.org/bbobcik/auderis-test-extra.svg?branch=master)](https://travis-ci.org/bbobcik/auderis-test-extra)
 
 
 ## Changelog
