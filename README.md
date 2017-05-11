@@ -1,8 +1,20 @@
-# auderis-test-extra
+# auderis-test-extra &mdash; Comfortable unit testing
 
-Useful additions to JUnit/Hamcrest testing environment.
+Useful additions to JUnit/Hamcrest/JUnitParams testing environment. You will reduce most of unit test boilerplate
+significantly:
+* Test cases can receive parameters of various types, as complex as needed.
+* Test assertions will be almost perfectly human-readable, providing natural constraints for tested objects
+* Creation of additional object matchers is simplified by `MultiPropertyMatcher`
+
+As a result, many test cases shrink to a couple of lines of code (excluding parameter definition). Following
+the [Given-When-Then](https://martinfowler.com/bliki/GivenWhenThen.html) (also known as "Arrange-Act-Assert")
+test style, you'll notice that *Given* section will be often empty and each of sections *When*, *Then* may
+consist of a single line of code. 
+
+Keywords: `Unit tests`, `Hamcrest`, `JUnitParams`
 
 [![Build Status](https://travis-ci.org/bbobcik/auderis-test-extra.svg?branch=master)](https://travis-ci.org/bbobcik/auderis-test-extra)
+[![Maven Central](https://maven-badges.herokuapp.com/maven-central/cz.auderis/auderis-test-extra/badge.svg)](https://maven-badges.herokuapp.com/maven-central/cz.auderis/auderis-test-extra)
 
 
 ## Changelog
@@ -96,6 +108,7 @@ Useful additions to JUnit/Hamcrest testing environment.
 
 ### Testing log output - SLF4J
 
+```java
     public class LoggingTest {
         @ClassRule
         public static LogFramework logFramework = LogFramework.slf4j();
@@ -118,6 +131,7 @@ Useful additions to JUnit/Hamcrest testing environment.
             assertThat( logRecord, hasMessage("This is a log") );
         }
     }
+```
 
 ### Multidimensional arrays
 
@@ -125,7 +139,7 @@ The following tests demonstrate:
 * Conversion of flat parameter lists into multidimensional arrays (see `@MultiArray` JavaDoc for details)
 * Usage of specialized Hamcrest matcher that checks multidimensional array dimensions
 
-
+```java
     @RunWith(JUnitParamsRunner.class)
     public class MultiDimTest {
             
@@ -149,3 +163,4 @@ The following tests demonstrate:
             assertThat( bigDecArray, is( arrayWithDimensions( expectedDimension )));
         }
     }
+```
