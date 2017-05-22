@@ -28,23 +28,36 @@ public class KeyValueBeanAnnotationConverter implements Converter<KeyValueBean, 
     private Class<?> propertyDelegateClass;
     private Object propertyDelegate;
 
+    public KeyValueBeanAnnotationConverter() {
+    }
+
+    protected KeyValueBeanAnnotationConverter(Class<?> beanClass, Class<?> propertyDelegateClass) {
+        this.beanClass = beanClass;
+        this.propertyDelegateClass = propertyDelegateClass;
+        initializePropertyDelegate();
+    }
+
+    private void initializePropertyDelegate() {
+        if ((null == propertyDelegateClass) || (Void.class == propertyDelegateClass) || (void.class == propertyDelegateClass)) {
+            this.propertyDelegateClass = null;
+            this.propertyDelegate = null;
+        } else {
+            try {
+                this.propertyDelegate = propertyDelegateClass.newInstance();
+            } catch (IllegalAccessException e) {
+                // We assume that the delegate class contains static methods
+                this.propertyDelegate = null;
+            } catch (Exception e) {
+                throw new IllegalArgumentException("Cannot create property delegate instance for " + beanClass + ": " + propertyDelegateClass, e);
+            }
+        }
+    }
+
     @Override
     public void initialize(KeyValueBean annotation) {
         this.beanClass = annotation.value();
-        final Class<?> delegateClass = annotation.propertyDelegate();
-        if ((null != delegateClass) && (delegateClass != Void.class)) {
-            this.propertyDelegateClass = delegateClass;
-            try {
-                this.propertyDelegate = delegateClass.newInstance();
-            } catch (IllegalAccessException e) {
-                this.propertyDelegate = null;
-            } catch (Exception e) {
-                throw new IllegalArgumentException("Cannot create property delegate instance for " + beanClass + ": " + delegateClass, e);
-            }
-        } else {
-            this.propertyDelegateClass = null;
-            this.propertyDelegate = null;
-        }
+        this.propertyDelegateClass = annotation.propertyDelegate();
+        initializePropertyDelegate();
     }
 
     @Override

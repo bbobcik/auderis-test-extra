@@ -19,6 +19,10 @@ Keywords: `Unit tests`, `Hamcrest`, `JUnitParams`
 
 ## Changelog
 
+### 1.3.2
+* Parameter converter `KeyValueBeanAnnotationConverter` can become a base for specialized
+  annotation converters
+
 ### 1.3.1
 * Parameter annotation `@KeyValueBean` facilitates creation and initialization of simple beans.
   The parameter text should be a whitespace-separated list of `key=value` pairs; the keys are then
