@@ -19,6 +19,19 @@ Keywords: `Unit tests`, `Hamcrest`, `JUnitParams`
 
 ## Changelog
 
+### 1.3.1
+* Parameter annotation `@KeyValueBean` facilitates creation and initialization of simple beans.
+  The parameter text should be a whitespace-separated list of `key=value` pairs; the keys are then
+  interpreted either as property names (in JavaBean sense) or as field names.
+* `@KeyValueBean` supports so-called property delegates, where setters are looked-up in a different
+  class. These "delegate setters" require two arguments &ndash; a target bean reference and the actual property
+  value. The delegate setters can be static.
+* To facilitate special conversion needs when using a `@KeyValueBean` delegate setter, the property value
+  argument can be a `String` instance &ndash; in this case the delegate setter is responsible for
+  appropriate parsing and conversion.
+* Property editors for `BigDecimal` and `BigInteger` added (registered either directly or via
+  `AdditionalPropertyEditors.register()`)
+
 ### 1.3.0
 * `ArrayPartMatcher` implemented
 
