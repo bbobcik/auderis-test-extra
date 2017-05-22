@@ -16,14 +16,17 @@
 
 package cz.auderis.test.parameter.annotation;
 
+import cz.auderis.test.parameter.annotation.impl.ParamAnnotationConverterTestSuite;
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
 
 @RunWith(Suite.class)
 @Suite.SuiteClasses({
+    ParamAnnotationConverterTestSuite.class,
     HexDataTest.class,
     XmlTextTest.class,
-    PropertyEditorAnnotationTest.class
+    PropertyEditorAnnotationTest.class,
+    KeyValueBeanTest.class,
 })
 public class ParamAnnotationTestSuite {
 
