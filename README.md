@@ -19,6 +19,10 @@ Keywords: `Unit tests`, `Hamcrest`, `JUnitParams`
 
 ## Changelog
 
+### 1.3.3
+* Extracted `AbstractKeyValueConverter` that does not implement `Converter` interface
+  so that class signatures do not clash
+
 ### 1.3.2
 * Parameter converter `KeyValueBeanAnnotationConverter` can become a base for specialized
   annotation converters
