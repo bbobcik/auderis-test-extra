@@ -38,31 +38,37 @@ enum CommonCharPattern implements SimpleCharPatternMatcher.CharSequencePattern {
     XML_NAME {
         @Override
         public boolean isValidStartChar(char c) {
+            final boolean result;
             if (((c >= 'A') && (c <= 'Z')) || ((c >= 'a') && (c <= 'z'))) {
-                return true;
+                result = true;
             } else if ((':' == c) || ('_' == c)) {
-                return true;
+                result = true;
             } else if ((c >= '\u00C0' &&  c <= '\u00D6') || (c >= '\u00D8' &&  c <= '\u00F6') || (c >= '\u00F8' &&  c <= '\u02FF')) {
-                return true;
+                result = true;
             } else if ((c >= '\u0370' && c <= '\u037D') || (c >= '\u037F' && c <= '\u1FFF') || (c >= '\u200C' && c <= '\u200D')) {
-                return true;
+                result = true;
             } else if ((c >= '\u2070' && c <= '\u218F') || (c >= '\u2C00' && c <= '\u2FEF') || (c >= '\u3001' && c <= '\uD7FF')) {
-                return true;
+                result = true;
             } else if ((c >= '\uF900' && c <= '\uFDCF') || (c >= '\uFDF0' && c <= '\uFFFD')) {
-                return true;
+                result = true;
+            } else {
+                result = false;
             }
-            return false;
+            return result;
         }
 
         @Override
         public boolean isValidChar(char c) {
+            final boolean result;
             // | "-" | "." | [0-9] | #xB7 | [#x0300-#x036F] | [#x203F-#x2040]
             if (('-' == c) || ('.' == c) || ('\u00B7' == c)) {
-                return true;
+                result = true;
             } else if ((c >= '0' && c <= '9') || (c >= '\u0300' && c <= '\u036F') || (c >= '\u203F' && c <= '\u2040')) {
-                return true;
+                result = true;
+            } else {
+                result = isValidStartChar(c);
             }
-            return isValidStartChar(c);
+            return result;
         }
 
         @Override

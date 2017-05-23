@@ -175,7 +175,7 @@ public class ByteSequenceFormatSupport {
         assert null != output;
         assert null != count;
         if (null == source) {
-            final String nullText = String.valueOf(null);
+            final String nullText = String.valueOf((Object) null);
             output.append(nullText);
             count[0] = nullText.length();
             return;
@@ -224,7 +224,7 @@ public class ByteSequenceFormatSupport {
 
     protected int getExpectedOutputLength(int byteCount) {
         if (byteCount < 0) {
-            return String.valueOf(null).length();
+            return String.valueOf((Object) null).length();
         }
         int size = 2 * byteCount;
         if (null != startDelimiter) {

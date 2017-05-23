@@ -109,7 +109,7 @@ class Log4jLoggerAdapter extends Logger {
     @Override
     protected void forcedLog(String ignored, Priority level, Object message, Throwable t) {
         final LogRecordCollector recordCollector = LogRecordCollector.RECORD_COLLECTOR;
-        final LogLevel internalLevel = LOG4J_TO_INTERNAL.get((Level) level);
+        final LogLevel internalLevel = LOG4J_TO_INTERNAL.get(level);
         if ((null == internalLevel) || !recordCollector.isLevelEnabled(internalLevel)) {
             return;
         }
