@@ -50,7 +50,7 @@ import java.util.concurrent.Callable;
  *
  * <h4>Joiner items</h4>
  * A joiner item can have one of two forms, described in the following table:
- * <table border="1">
+ * <table border="1" summary="Joiner items">
  *   <thead>
  *     <tr>
  *       <th>Item type</th>
@@ -118,7 +118,7 @@ public class NaturalDescriptionJoiner implements SelfDescribing {
      * normal separator is a string consisting of comma+space characters and the last separator
      * is the word "and" surrounded by a single space on both ends.
      * <p>
-     * Equivalent: {@code new NaturalDescriptionJoiner(null, ",}&#9251;{@code ", "}&#9251;{@code and}&#9251;{@code ", null)}
+     * Equivalent: {@code new NaturalDescriptionJoiner(null, ", ", " and ", null)}
      *
      * @see #NaturalDescriptionJoiner(Object, Object, Object, Object)
      */
@@ -302,7 +302,7 @@ public class NaturalDescriptionJoiner implements SelfDescribing {
     /**
      * Adds a new description item, allowing to specify an optional prefix and suffix. Apart from
      * strings and other character sequences, prefix and suffix can have following types:
-     * <table border="1">
+     * <table border="1" summary="Supported types for prefix and suffix">
      *   <thead>
      *     <tr>
      *       <th>Type</th>
