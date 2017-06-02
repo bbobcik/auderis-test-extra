@@ -19,6 +19,9 @@ Keywords: `Unit tests`, `Hamcrest`, `JUnitParams`
 
 ## Changelog
 
+### 1.3.4
+* Fix: `WorkFolder` did not create correct subfolder structure.
+
 ### 1.3.3
 * Extracted `AbstractKeyValueConverter` that does not implement `Converter` interface
   so that class signatures do not clash

@@ -101,7 +101,7 @@ class WorkSubFolder implements WorkFolderInterface {
         }
         int relativePathLength = relativePath.length() + WorkFolder.computeRelativePathLength(pathComponents);
         final StringBuilder relativePathBuilder = new StringBuilder(relativePathLength);
-        relativePathBuilder.append(relativePath);
+        relativePathBuilder.append(relativePath).append('/');
         WorkFolder.prepareSubdirs(pathComponents, folderFile, relativePathBuilder);
         final WorkSubFolder folder = new WorkSubFolder(rootFolder, relativePathBuilder.toString());
         return folder;
