@@ -26,6 +26,8 @@ public interface WorkFolderInterface {
 
     File newFile(String targetPath, InputStream initialContents) throws IOException;
 
+    File newFile(String targetPath, InitialContentsProvider contentsProvider) throws IOException;
+
     File newResourceCopy(String targetPath, String resourceName) throws IOException;
 
     File newResourceCopy(String resourceName) throws IOException;

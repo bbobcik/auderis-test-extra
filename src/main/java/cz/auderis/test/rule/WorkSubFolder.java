@@ -80,6 +80,12 @@ class WorkSubFolder implements WorkFolderInterface {
     }
 
     @Override
+    public File newFile(String targetPath, InitialContentsProvider contentsProvider) throws IOException {
+        final InputStream stream = (null != contentsProvider) ? contentsProvider.getContents() : null;
+        return newFile(targetPath, stream);
+    }
+
+    @Override
     public File newResourceCopy(String targetPath, String resourceName) throws IOException {
         if ((null == targetPath) || (null == resourceName)) {
             throw new NullPointerException();

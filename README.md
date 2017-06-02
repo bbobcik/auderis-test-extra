@@ -19,6 +19,14 @@ Keywords: `Unit tests`, `Hamcrest`, `JUnitParams`
 
 ## Changelog
 
+### 1.3.5
+* More flexible initialization of files in `WorkFolder`, using `InitialContentProvider` interface.
+  Useful utility providers (such as `lines()`, `bytes()` and `serializedForm()`) are prepared
+  in `ContentProviders` class.
+* `WorkFolder` can provide a ClassLoader that looks up resources within the work folder space.
+  The classloader can be obtained via `getClassLoaderForResources()`; when needed, it can be
+  installed as current thread's context classloader by calling `installContextClassLoaderForResources()`.
+
 ### 1.3.4
 * Fix: `WorkFolder` did not create correct subfolder structure.
 

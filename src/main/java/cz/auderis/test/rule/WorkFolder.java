@@ -26,7 +26,11 @@ import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.util.Collections;
 import java.util.Deque;
+import java.util.Enumeration;
 import java.util.LinkedList;
 
 /**
@@ -48,6 +52,9 @@ public class WorkFolder extends TemporaryFolder implements WorkFolderInterface {
 
 	private Class<?> resourceSearchBaseClass;
 	private Class<?> currentTestClass;
+	private FolderBasedClassLoader folderClassLoader;
+	private ClassLoader originalContextClassLoader;
+	private boolean contextClassLoaderInstalled;
 
 	/**
 	 * Creates a new instance of {@code WorkFolder}.
@@ -96,6 +103,12 @@ public class WorkFolder extends TemporaryFolder implements WorkFolderInterface {
 					statement.evaluate();
 				} finally {
 					currentTestClass = null;
+					if (contextClassLoaderInstalled) {
+					    synchronized (WorkFolder.this) {
+                            Thread.currentThread().setContextClassLoader(originalContextClassLoader);
+                            contextClassLoaderInstalled = false;
+                        }
+                    }
 				}
 			}
 		};
@@ -154,7 +167,13 @@ public class WorkFolder extends TemporaryFolder implements WorkFolderInterface {
 		return target;
 	}
 
-	@Override
+    @Override
+    public File newFile(String targetPath, InitialContentsProvider contentsProvider) throws IOException {
+	    final InputStream stream = (null != contentsProvider) ? contentsProvider.getContents() : null;
+	    return newFile(targetPath, stream);
+    }
+
+    @Override
 	public File newResourceCopy(String targetPath, String resourceName) throws IOException {
 		if ((null == targetPath) || (null == resourceName)) {
 			throw new NullPointerException();
@@ -186,6 +205,72 @@ public class WorkFolder extends TemporaryFolder implements WorkFolderInterface {
 	public void clean() throws IOException {
 		recursiveDelete(getRoot());
 	}
+
+	public ClassLoader getClassLoaderForResources() {
+        return getClassLoaderForResources(null);
+    }
+
+    public synchronized ClassLoader getClassLoaderForResources(ClassLoader parentClassLoader) {
+        parentClassLoader = resolveParentClassLoader(parentClassLoader);
+        final ClassLoader result;
+        if (null == folderClassLoader) {
+            folderClassLoader = new FolderBasedClassLoader(parentClassLoader);
+            result = folderClassLoader;
+        } else if (folderClassLoader.getParent() != parentClassLoader) {
+            result = new FolderBasedClassLoader(parentClassLoader);
+        } else {
+            result = folderClassLoader;
+        }
+        return result;
+    }
+
+    public synchronized void installContextClassLoaderForResources(ClassLoader parentClassLoader) {
+        final ClassLoader resourceClassLoader = getClassLoaderForResources(parentClassLoader);
+        final Thread currentThread = Thread.currentThread();
+        if (!contextClassLoaderInstalled) {
+            originalContextClassLoader = currentThread.getContextClassLoader();
+        }
+        currentThread.setContextClassLoader(resourceClassLoader);
+        contextClassLoaderInstalled = true;
+    }
+
+    private ClassLoader resolveParentClassLoader(ClassLoader providedParent) {
+	    if (null != providedParent) {
+	        return providedParent;
+        }
+        //
+        final ClassLoader contextClassLoader;
+	    if (contextClassLoaderInstalled) {
+	        contextClassLoader = originalContextClassLoader;
+        } else {
+	        contextClassLoader = Thread.currentThread().getContextClassLoader();
+        }
+        if (null != contextClassLoader) {
+	        return contextClassLoader;
+        }
+        //
+        final ClassLoader resourceClassLoader;
+	    if (null != resourceSearchBaseClass) {
+	        resourceClassLoader = resourceSearchBaseClass.getClassLoader();
+        } else {
+	        resourceClassLoader = null;
+        }
+        if (null != resourceClassLoader) {
+	        return resourceClassLoader;
+        }
+        //
+        final ClassLoader testClassLoader;
+	    if (null != currentTestClass) {
+	        testClassLoader = currentTestClass.getClassLoader();
+        } else {
+	        testClassLoader = null;
+        }
+        if (null != testClassLoader) {
+            return testClassLoader;
+        }
+	    //
+        return ClassLoader.getSystemClassLoader();
+    }
 
 	private File prepareTargetFile(String targetPath) {
 		final File target = new File(getRoot(), targetPath);
@@ -254,6 +339,9 @@ public class WorkFolder extends TemporaryFolder implements WorkFolderInterface {
 		return (0 != filenameStart) ? resourceName.substring(filenameStart) : resourceName;
 	}
 
+    /**
+     * Copies the {@code initialContents} to the given target file and closes all streams afterwards.
+     */
 	static void copyContents(File target, InputStream initialContents) throws IOException {
 		final FileOutputStream targetStream = new FileOutputStream(target, false);
 		try {
@@ -323,5 +411,34 @@ public class WorkFolder extends TemporaryFolder implements WorkFolderInterface {
 		}
 		return noDirsFound;
 	}
+
+	final class FolderBasedClassLoader extends ClassLoader {
+        FolderBasedClassLoader(ClassLoader parentClassLoader) {
+            super(parentClassLoader);
+        }
+
+        @Override
+        protected URL findResource(String resourcePath) {
+            final File resourceFile = new File(getRoot(), resourcePath);
+            if (!resourceFile.isFile()) {
+                return null;
+            }
+            try {
+                return resourceFile.toURI().toURL();
+            } catch (MalformedURLException e) {
+                return null;
+            }
+        }
+
+        @Override
+        protected Enumeration<URL> findResources(String resourcePath) throws IOException {
+            final File resourceFile = new File(getRoot(), resourcePath);
+            if (!resourceFile.isFile()) {
+                return Collections.emptyEnumeration();
+            }
+            final URL resourceURL = resourceFile.toURI().toURL();
+            return Collections.enumeration(Collections.singletonList(resourceURL));
+        }
+    }
 
 }
