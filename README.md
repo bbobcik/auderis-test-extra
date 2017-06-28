@@ -19,6 +19,10 @@ Keywords: `Unit tests`, `Hamcrest`, `JUnitParams`
 
 ## Changelog
 
+### 1.3.6
+* `MultiPropertyMatcher` supports description contexts, where description providers are informed
+  about object that is a subject of testing.
+
 ### 1.3.5
 * More flexible initialization of files in `WorkFolder`, using `InitialContentProvider` interface.
   Useful utility providers (such as `lines()`, `bytes()` and `serializedForm()`) are prepared

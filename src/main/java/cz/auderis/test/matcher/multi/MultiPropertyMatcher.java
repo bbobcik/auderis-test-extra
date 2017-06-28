@@ -1,5 +1,6 @@
 package cz.auderis.test.matcher.multi;
 
+import cz.auderis.test.support.ContextAwareDescriptionProvider;
 import cz.auderis.test.support.DescriptionProvider;
 import cz.auderis.test.support.MismatchDescriptionProvider;
 import cz.auderis.test.support.NaturalDescriptionJoiner;
@@ -28,6 +29,7 @@ public class MultiPropertyMatcher<T> extends TypeSafeMatcher<T> {
     Callable<NaturalDescriptionJoiner> joinerProvider;
     Callable<NaturalDescriptionJoiner> mismatchJoinerProvider;
     PropertyEntry lastEntry;
+    ContextAwareDescriptionProvider defaultContextReceiver;
 
     public MultiPropertyMatcher(Class<T> matchedTypeClass, String objectName) {
         this(matchedTypeClass, objectName, null, null);
@@ -110,6 +112,10 @@ public class MultiPropertyMatcher<T> extends TypeSafeMatcher<T> {
         this.mismatchJoinerProvider = mismatchJoinerProvider;
     }
 
+    public void setDefaultContextReceiver(ContextAwareDescriptionProvider defaultContextReceiver) {
+        this.defaultContextReceiver = defaultContextReceiver;
+    }
+
     @Override
     protected boolean matchesSafely(T obj) {
         for (PropMatcherEntry entry : entries) {
@@ -126,6 +132,7 @@ public class MultiPropertyMatcher<T> extends TypeSafeMatcher<T> {
         final NaturalDescriptionJoiner joiner;
         if (null == joinerProvider) {
             joiner = new NaturalDescriptionJoiner(" with ", ", ", " and ", null);
+            joiner.withDescriptionContextReceiver(defaultContextReceiver);
         } else {
             try {
                 joiner = joinerProvider.call();
@@ -133,6 +140,7 @@ public class MultiPropertyMatcher<T> extends TypeSafeMatcher<T> {
                 throw new RuntimeException("Cannot describe object " + objectName, e);
             }
         }
+        joiner.withDescriptionContext(new MultiPropertyMatcherContextImpl(this, null));
         for (PropMatcherEntry entry : entries) {
             entry.addToJoiner(joiner);
         }
@@ -144,6 +152,7 @@ public class MultiPropertyMatcher<T> extends TypeSafeMatcher<T> {
         final NaturalDescriptionJoiner joiner;
         if (null == mismatchJoinerProvider) {
             joiner = new NaturalDescriptionJoiner(", ", " and ");
+            joiner.withDescriptionContextReceiver(defaultContextReceiver);
         } else {
             try {
                 joiner = mismatchJoinerProvider.call();
@@ -151,6 +160,7 @@ public class MultiPropertyMatcher<T> extends TypeSafeMatcher<T> {
                 throw new RuntimeException("Cannot describe mismatch of object " + objectName, e);
             }
         }
+        joiner.withDescriptionContext(new MultiPropertyMatcherContextImpl(this, item));
         for (PropMatcherEntry entry : entries) {
             entry.addMismatchToJoiner(item, joiner);
         }

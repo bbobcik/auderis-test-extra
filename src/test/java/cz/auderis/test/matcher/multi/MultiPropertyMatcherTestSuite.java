@@ -7,7 +7,8 @@ import org.junit.runners.Suite;
 @Suite.SuiteClasses({
         IntrospectionPropertyExtractorTest.class,
         MultiPropertyMatcherTest.class,
-        FluentMultiPropertyMatcherTest.class
+        FluentMultiPropertyMatcherTest.class,
+        MultiPropertyMatcherContextTest.class
 })
 public class MultiPropertyMatcherTestSuite {
 
