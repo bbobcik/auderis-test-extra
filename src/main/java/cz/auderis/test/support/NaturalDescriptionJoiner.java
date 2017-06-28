@@ -93,6 +93,8 @@ public class NaturalDescriptionJoiner implements SelfDescribing {
     Object suffix;
     Object normalSeparator;
     Object lastSeparator;
+    Object descriptionContext;
+    ContextAwareDescriptionProvider descriptionContextReceiver;
     boolean usePrefixWhenEmpty;
     boolean useSuffixWhenEmpty;
     final List<DescriptionItem> items;
@@ -197,6 +199,35 @@ public class NaturalDescriptionJoiner implements SelfDescribing {
      */
     public NaturalDescriptionJoiner withLastSeparator(Object lastSep) {
         this.lastSeparator = (null != lastSep) ? lastSep : "";
+        return this;
+    }
+
+    /**
+     * Defines a context, which is an arbitrary object, for the current use of this Joiner instance. This
+     * context is fed into a description context receiver (if one is set) and to any description provider
+     * implementing this interface. The context is transferred immediately before invocation of a description
+     * provider.
+     *
+     * @param newContext an object that contains application-defined context
+     * @return this joiner
+     */
+    public NaturalDescriptionJoiner withDescriptionContext(Object newContext) {
+        this.descriptionContext = newContext;
+        return this;
+    }
+
+    /**
+     * Certain application types can not or do not want their description providers to implement
+     * {@link ContextAwareDescriptionProvider} interface. As an alternative, a separate instance of
+     * that interface can be registered by this method. The {@code receiver} is then informed about
+     * the current context before any description provider is invoked.
+     *
+     * @param receiver implementation of {@code ContextAwareDescriptionProvider} that receives notifications
+     *                 about current description context immediately before a description provider is invoked
+     * @return this joiner
+     */
+    public NaturalDescriptionJoiner withDescriptionContextReceiver(ContextAwareDescriptionProvider receiver) {
+        this.descriptionContextReceiver = receiver;
         return this;
     }
 
@@ -456,12 +487,15 @@ public class NaturalDescriptionJoiner implements SelfDescribing {
         }
     }
 
-    private static void appendItemSurroundingTextToDescription(DescriptionItem item, Object textChunk, Description desc) {
+    private void appendItemSurroundingTextToDescription(DescriptionItem item, Object textChunk, Description desc) {
         if ((null != item.matcher) && (textChunk instanceof MismatchDescriptionProvider)) {
+            fireContextNotification(textChunk);
             ((MismatchDescriptionProvider) textChunk).describe(item.matcher, item.value, desc);
         } else if (textChunk instanceof DescriptionProvider) {
+            fireContextNotification(textChunk);
             ((DescriptionProvider) textChunk).describe(item.value, desc);
         } else {
+            fireContextNotification(null);
             smartAppend(textChunk, desc);
         }
     }
@@ -484,8 +518,15 @@ public class NaturalDescriptionJoiner implements SelfDescribing {
         }
     }
 
+    private void fireContextNotification(Object descriptionProvider) {
+        if (descriptionProvider instanceof ContextAwareDescriptionProvider) {
+            ((ContextAwareDescriptionProvider) descriptionProvider).setContext(descriptionContext);
+        } else if (null != descriptionContextReceiver) {
+            descriptionContextReceiver.setContext(descriptionContext);
+        }
+    }
 
-    static final class DescriptionItem {
+    final class DescriptionItem {
         final Object valuePrefix;
         final Object valueSuffix;
         final Object value;
@@ -533,6 +574,7 @@ public class NaturalDescriptionJoiner implements SelfDescribing {
         }
 
         void describeValue(Description desc) {
+            fireContextNotification(valueDescriptionProvider);
             if (null != valueDescriptionProvider) {
                 valueDescriptionProvider.describe(value, desc);
             } else if (value instanceof SelfDescribing) {
@@ -543,6 +585,7 @@ public class NaturalDescriptionJoiner implements SelfDescribing {
         }
 
         void describeMismatch(Description desc) {
+            fireContextNotification(mismatchDescriptionProvider);
             if (null != mismatchDescriptionProvider) {
                 mismatchDescriptionProvider.describe(matcher, value, desc);
             } else if (null != matcher) {
