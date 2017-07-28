@@ -7,7 +7,9 @@ import org.junit.Test;
 import org.junit.experimental.categories.Category;
 import org.junit.runner.RunWith;
 import org.test.temp.bean.SimpleBean;
+import org.test.temp.bean.SimpleBeanExtraPropertyDelegate;
 import org.test.temp.bean.SimpleBeanPropertyDelegate;
+import org.test.temp.bean.SimpleBeanStaticExtraPropertyDelegate;
 import org.test.temp.bean.SimpleBeanStaticPropertyDelegate;
 
 import static org.hamcrest.CoreMatchers.is;
@@ -76,6 +78,32 @@ public class KeyValueBeanTest {
     })
     public void shouldSetFieldDirectly(@KeyValueBean(SimpleBean.class) SimpleBean bean, long expectedA) throws Exception {
         assertThat("field A", bean.getA(), is(expectedA));
+    }
+
+    @Test
+    @Parameters({
+            "x2=abc y2=123              | ~abc~ | 124",
+            "x2=abc                     | ~abc~ | 0",
+            "y2=987                     |       | 988",
+            "x2=abc y2=456 x2=KLM y2=-2 | ~KLM~ | -1",
+            "z2=123                     |       | 1230",
+    })
+    public void shouldSetPropertyViaExtraPropertySetter(@KeyValueBean(value = SimpleBean.class, propertyDelegate = SimpleBeanExtraPropertyDelegate.class) SimpleBean bean, String expectedX, int expectedY) throws Exception {
+        assertThat("property X", bean.getX(), is(expectedX));
+        assertThat("property Y", bean.getY(), is(expectedY));
+    }
+
+    @Test
+    @Parameters({
+            "x2=abc y2=123              | ~abc~ | 124",
+            "x2=abc                     | ~abc~ | 0",
+            "y2=987                     |       | 988",
+            "x2=abc y2=456 x2=KLM y2=-2 | ~KLM~ | -1",
+            "z2=123                     |       | 1230",
+    })
+    public void shouldSetPropertyViaStaticExtraPropertySetter(@KeyValueBean(value = SimpleBean.class, propertyDelegate = SimpleBeanStaticExtraPropertyDelegate.class) SimpleBean bean, String expectedX, int expectedY) throws Exception {
+        assertThat("property X", bean.getX(), is(expectedX));
+        assertThat("property Y", bean.getY(), is(expectedY));
     }
 
 }

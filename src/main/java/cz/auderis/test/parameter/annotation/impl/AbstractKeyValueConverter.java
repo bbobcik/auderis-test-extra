@@ -1,10 +1,9 @@
 package cz.auderis.test.parameter.annotation.impl;
 
-import junitparams.converters.ConversionFailedException;
-
 import java.beans.PropertyEditor;
 import java.beans.PropertyEditorManager;
 import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.HashMap;
@@ -24,7 +23,8 @@ public abstract class AbstractKeyValueConverter {
 
     protected Class<?> beanClass;
     protected Class<?> propertyDelegateClass;
-    private Object propertyDelegate;
+    protected Object propertyDelegate;
+    private Method delegateExtraPropertySetter;
 
     protected AbstractKeyValueConverter() {
     }
@@ -46,6 +46,7 @@ public abstract class AbstractKeyValueConverter {
         if ((null == propertyDelegateClass) || (Void.class == propertyDelegateClass) || (void.class == propertyDelegateClass)) {
             this.propertyDelegateClass = null;
             this.propertyDelegate = null;
+            this.delegateExtraPropertySetter = null;
         } else {
             try {
                 this.propertyDelegate = propertyDelegateClass.newInstance();
@@ -55,10 +56,14 @@ public abstract class AbstractKeyValueConverter {
             } catch (Exception e) {
                 throw new IllegalArgumentException("Cannot create property delegate instance for " + beanClass + ": " + propertyDelegateClass, e);
             }
+            this.delegateExtraPropertySetter = findMethod("setExtraProperty", propertyDelegateClass, beanClass, String.class, String.class);
+            if ((null != delegateExtraPropertySetter) && !delegateExtraPropertySetter.isAccessible()) {
+                delegateExtraPropertySetter.setAccessible(true);
+            }
         }
     }
 
-    public Object convert(Object param) throws ConversionFailedException {
+    public Object convert(Object param) {
         if ((null == param) || beanClass.isAssignableFrom(param.getClass())) {
             return param;
         }
@@ -74,6 +79,7 @@ public abstract class AbstractKeyValueConverter {
     }
 
     void applyProperties(Object target, List<KeyValue> keyValues) {
+        PROPERTY_ITERATION:
         for (KeyValue keyValue : keyValues) {
             final String propertyName = keyValue.key;
             final Setter propertySetter = resolvePropertySetter(propertyName);
@@ -87,17 +93,18 @@ public abstract class AbstractKeyValueConverter {
                     } else {
                         propertySetter.method.invoke(target, setterArgument);
                     }
+                } catch (InvocationTargetException e) {
+                    throw new IllegalArgumentException("Cannot set property '" + propertyName + "' on " + beanClass + ": " + setterArgument, e.getCause());
                 } catch (Exception e) {
                     throw new IllegalArgumentException("Cannot set property '" + propertyName + "' on " + beanClass + ": " + setterArgument, e);
                 } finally {
                     propertySetter.restoreAccess();
                 }
-            } else {
-                // Fallback: try injecting into the field
-                final Field propertyField = findField(propertyName, beanClass);
-                if (null == propertyField) {
-                    throw new IllegalArgumentException("Setter for property '" + propertyName + "' not found: " + beanClass);
-                }
+                continue PROPERTY_ITERATION;
+            }
+            // Fallback 1: try injecting into the field
+            final Field propertyField = findField(propertyName, beanClass);
+            if (null != propertyField) {
                 final Class<?> fieldType = propertyField.getType();
                 final Object fieldValue = adaptArgumentToType(keyValue.value, fieldType);
                 final boolean origAccess = propertyField.isAccessible();
@@ -109,8 +116,31 @@ public abstract class AbstractKeyValueConverter {
                 } finally {
                     propertyField.setAccessible(origAccess);
                 }
+                continue PROPERTY_ITERATION;
             }
+            // Fallback 2: use optional extra property setter
+            if (null != delegateExtraPropertySetter) {
+                try {
+                    delegateExtraPropertySetter.invoke(propertyDelegate, target, propertyName, keyValue.value);
+                } catch (InvocationTargetException e) {
+                    throw new IllegalArgumentException("Cannot set extra property '" + propertyName + "': " + keyValue.value, e.getCause());
+                } catch (Exception e) {
+                    throw new IllegalArgumentException("Cannot set extra property '" + propertyName + "': " + keyValue.value, e);
+                }
+                continue PROPERTY_ITERATION;
+            }
+            // Fallback 3: give a chance to subclasses
+            final boolean handledBySubclass = applyProperty(target, propertyName, keyValue.value);
+            if (handledBySubclass) {
+                continue PROPERTY_ITERATION;
+            }
+            // Neither of above methods succeeded, report error
+            throw new IllegalArgumentException("Cannot set property '" + propertyName + "' on " + beanClass + ": no setter/field found");
         }
+    }
+
+    protected boolean applyProperty(Object target, String propertyName, String propertyValue) {
+        return false;
     }
 
     static Object adaptArgumentToType(String value, Class<?> targetType) {

@@ -19,6 +19,11 @@ Keywords: `Unit tests`, `Hamcrest`, `JUnitParams`
 
 ## Changelog
 
+### 1.3.7
+* `AbstractKeyValueConverter` supports additional methods how to set a property to a bean;
+  if the property delegate class offers method `setExtraProperty(bean, propertyName, textValue)`,
+  it is used as one of fallback methods. Subclasses can provide their own property setting code.
+
 ### 1.3.6
 * `MultiPropertyMatcher` supports description contexts, where description providers are informed
   about object that is a subject of testing.
